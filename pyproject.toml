@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tess-transit-benchmark"
+version = "0.1.0"
+description = "A rigorous benchmark comparing classical signal processing (BLS) and machine learning methods for exoplanet transit detection in TESS light curves"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "TESS Benchmark Team", email = "research@example.com"}
+]
+keywords = [
+    "astrophysics",
+    "exoplanets",
+    "tess",
+    "lightkurve",
+    "box-least-squares",
+    "machine-learning",
+    "deep-learning",
+    "transit-detection"
+]
+dependencies = [
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "pandas>=2.0.0",
+    "astropy>=5.3.0",
+    "lightkurve>=2.4.0",
+    "astroquery>=0.4.6",
+    "scikit-learn>=1.3.0",
+    "torch>=2.0.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "pyyaml>=6.0",
+    "tqdm>=4.65.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=tess_benchmark --cov-report=term-missing"
+testpaths = [
+    "tests"
+]
+pythonpath = [
+    "src"
+]
+filterwarnings = [
+    "ignore::UserWarning:lightkurve.*",
+    "ignore::DeprecationWarning"
+]

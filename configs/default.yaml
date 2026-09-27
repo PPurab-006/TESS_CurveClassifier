@@ -1,0 +1,50 @@
+# Default configuration for TESS Transit Detection Benchmark
+
+project:
+  name: "tess-transit-benchmark"
+  seed: 42
+  log_level: "INFO"
+  results_dir: "results"
+
+data:
+  cache_dir: "data/raw"
+  processed_dir: "data/processed"
+  mission: "TESS"
+  author: "SPOC"
+  flux_column: "pdcsap_flux"
+  cadence_minutes: 2.0
+
+bls:
+  min_period: 0.5
+  max_period: 15.0
+  frequency_factor: 4.0
+  sde_threshold: 6.0
+  min_snr: 5.0
+
+features:
+  n_phase_bins: 200
+  detrend_window_days: 0.5
+  clip_outliers: true
+
+models:
+  random_forest:
+    n_estimators: 100
+    max_depth: 8
+  gradient_boosting:
+    max_iter: 100
+    max_depth: 5
+  logistic_regression:
+    max_iter: 1000
+    C: 1.0
+  svm:
+    kernel: "rbf"
+    C: 1.0
+  cnn1d:
+    sequence_length: 200
+    epochs: 25
+    batch_size: 32
+    lr: 0.001
+
+evaluation:
+  test_size: 0.25
+  n_cv_splits: 5

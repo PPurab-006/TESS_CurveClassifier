@@ -1,0 +1,40 @@
+# Synthetic Benchmark Dataset Generation Configuration
+
+dataset:
+  name: "synthetic_validation_suite"
+  seed: 42
+  n_stars: 80
+  transit_fraction: 0.5
+  duration_days: 27.4
+  cadence_minutes: 2.0
+
+transit_parameters:
+  period_min_days: 1.2
+  period_max_days: 8.5
+  depth_min: 0.002
+  depth_max: 0.012
+  duration_hours_min: 1.5
+  duration_hours_max: 4.0
+  ingress_fraction: 0.15
+
+stellar_parameters:
+  baseline_flux: 1.0
+  noise_sigma_min: 0.0008
+  noise_sigma_max: 0.0015
+  variability_amplitude_max: 0.003
+  variability_period_min_days: 4.0
+  variability_period_max_days: 14.0
+  flare_rate: 0.0002
+  flare_amplitude_scale: 6.0
+
+systematics:
+  include_sector_gap: true
+  sector_gap_start: 13.1
+  sector_gap_duration: 1.2
+  dropout_fraction: 0.01
+
+robustness_grid:
+  noise_multipliers: [1.0, 1.5, 2.0, 3.0]
+  depth_multipliers: [1.0, 0.75, 0.5, 0.25]
+  gap_days: [0.0, 1.0, 2.0, 4.0]
+  dropout_fractions: [0.0, 0.1, 0.25, 0.4]
