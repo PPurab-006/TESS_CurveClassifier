@@ -45,3 +45,32 @@ def test_compute_metrics_mixed():
     d = report.to_dict()
     assert d["model_name"] == "TestModel"
     assert "pr_auc" in d
+
+
+def test_compute_metrics_all_negative():
+    """Verify metrics calculation when all samples belong to negative class without divide-by-zero."""
+    y_true = np.array([0, 0, 0, 0])
+    y_pred = np.array([0, 0, 0, 0])
+    report = compute_metrics(y_true, y_pred, model_name="AllNegModel")
+    assert report.tp == 0
+    assert report.fp == 0
+    assert report.tn == 4
+    assert report.fn == 0
+    assert report.precision == 0.0
+    assert report.recall == 0.0
+    assert report.specificity == 1.0
+
+
+def test_compute_metrics_serialization():
+    """Verify EvaluationReport converts to JSON-serializable dictionary."""
+    import json
+    y_true = np.array([0, 1])
+    y_pred = np.array([0, 1])
+    report = compute_metrics(y_true, y_pred, model_name="JSONModel", train_time_sec=1.5, inference_latency_ms=0.5)
+    d = report.to_dict()
+    json_str = json.dumps(d)
+    recovered = json.loads(json_str)
+    assert recovered["model_name"] == "JSONModel"
+    assert recovered["train_time_sec"] == 1.5
+    assert recovered["inference_latency_ms"] == 0.5
+

@@ -103,7 +103,10 @@ def main():
             variability_amplitude=float(var_amp),
             variability_period_days=float(var_period),
             flare_rate=s_params.get("flare_rate", 0.0002),
+            flare_amplitude_scale=s_params.get("flare_amplitude_scale", 6.0),
             include_sector_gap=sys_params.get("include_sector_gap", True),
+            sector_gap_start=sys_params.get("sector_gap_start", 13.1),
+            sector_gap_duration=sys_params.get("sector_gap_duration", 1.2),
             dropout_fraction=sys_params.get("dropout_fraction", 0.01),
             seed=int(rng.integers(1, 1000000))
         )

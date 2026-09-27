@@ -1,0 +1,50 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/purab/Purab/Projects/TESS-Light-curve
+configfile: pyproject.toml
+plugins: cov-7.1.0
+collected 34 items
+
+tests/test_bls.py ....                                                   [ 11%]
+tests/test_features.py ....                                              [ 23%]
+tests/test_loader.py ..                                                  [ 29%]
+tests/test_metrics.py ....                                               [ 41%]
+tests/test_models.py ..                                                  [ 47%]
+tests/test_preprocessing.py ...                                          [ 55%]
+tests/test_robustness.py ....                                            [ 67%]
+tests/test_splitting.py ...                                              [ 76%]
+tests/test_synthetic.py ....                                             [ 88%]
+tests/test_utils.py ..../home/purab/Purab/Projects/TESS-Light-curve/.venv/lib/python3.11/site-packages/coverage/inorout.py:574: CoverageWarning: Module tess_benchmark was previously imported, but not measured (module-not-measured); see https://coverage.readthedocs.io/en/7.16.2/messages.html#warning-module-not-measured
+  self.warn(msg, slug="module-not-measured")
+                                                 [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.11.15-final-0 _______________
+
+Name                                          Stmts   Miss  Cover   Missing
+---------------------------------------------------------------------------
+src/tess_benchmark/__init__.py                    1      0   100%
+src/tess_benchmark/baselines/__init__.py          2      0   100%
+src/tess_benchmark/baselines/bls.py              73      4    95%   78, 123, 200, 203
+src/tess_benchmark/data/__init__.py               4      0   100%
+src/tess_benchmark/data/protocol.py              34      1    97%   69
+src/tess_benchmark/data/synthetic.py            121      3    98%   285, 292, 374
+src/tess_benchmark/data/tess_loader.py           42     30    29%   14-15, 57-59, 93-140
+src/tess_benchmark/evaluation/__init__.py         4      0   100%
+src/tess_benchmark/evaluation/metrics.py         37      0   100%
+src/tess_benchmark/evaluation/robustness.py      59      4    93%   33, 58, 92, 116
+src/tess_benchmark/evaluation/splitting.py       33      2    94%   77, 101
+src/tess_benchmark/features/__init__.py           3      0   100%
+src/tess_benchmark/features/extractors.py        88      8    91%   58, 61, 77, 93, 110, 117, 211-213
+src/tess_benchmark/features/folding.py           39     12    69%   81-82, 90-91, 130-151
+src/tess_benchmark/models/__init__.py             3      0   100%
+src/tess_benchmark/models/classical.py           36      4    89%   52-55
+src/tess_benchmark/models/cnn1d.py              101      3    97%   117, 130-131
+src/tess_benchmark/utils/__init__.py              4      0   100%
+src/tess_benchmark/utils/config.py               12      1    92%   36
+src/tess_benchmark/utils/logging.py              22      0   100%
+src/tess_benchmark/utils/seed.py                 14      0   100%
+---------------------------------------------------------------------------
+TOTAL                                           732     72    90%
+============================== 34 passed in 6.90s ==============================
+EXIT_CODE=0

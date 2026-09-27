@@ -1,0 +1,56 @@
+{
+  "audit_timestamp_iso": "2026-09-28T01:07:00Z",
+  "environment": {
+    "os": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+    "python_version": "3.11.15",
+    "python_executable": "/home/purab/Purab/Projects/TESS-Light-curve/.venv/bin/python",
+    "cpu_count": 16,
+    "git_commit": "b9602ad",
+    "git_branch": "main"
+  },
+  "core_libraries": {
+    "astropy": "8.0.1",
+    "lightkurve": "2.5.1",
+    "astroquery": "0.4.11",
+    "torch": "2.14.0+cu130",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.17.1",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "pytest": "9.1.1"
+  },
+  "verified_artifacts": {
+    "data/processed/synthetic_light_curves.pkl": {
+      "sha256": "42a04aa1deead0066b290bb147d56dadc6bb1d842dcf709994915e8402aad88d",
+      "size_bytes": 19740881
+    },
+    "data/processed/features_tabular.csv": {
+      "sha256": "fcd3eaf7fdf1bf83e3c8156c6c8c45a5331d6efb25ef5cdc7279504730ba9b51",
+      "size_bytes": 18038
+    },
+    "data/processed/phase_vectors.npy": {
+      "sha256": "6c10827fe76b51c25e32f2364cfa0acac5e8a9872f8513f6f4b9979a99ce486d",
+      "size_bytes": 64128
+    },
+    "results/metrics/bls_benchmark.json": {
+      "sha256": "274b812686685f1129dbb00a58eaf13c9368925220fc1a5e1cc9acbf1d206e09",
+      "size_bytes": 444
+    },
+    "results/metrics/model_comparison.csv": {
+      "sha256": "0df5fa2722ad877991a55463d5a533298404cd8936b4a2195f728386a2479f7a",
+      "size_bytes": 564
+    },
+    "results/metrics/model_comparison.json": {
+      "sha256": "d1adc119f5cf51cd3d0dabc0507e92ccb02f1f7c6010bf01f76be41b541f75d2",
+      "size_bytes": 1616
+    },
+    "results/metrics/robustness_suite.csv": {
+      "sha256": "b2e536a6a6ae030764c2c954f087f578a0732e0b4c9998ee83847434b5e02a2c",
+      "size_bytes": 2444
+    },
+    "results/metrics/robustness_suite.json": {
+      "sha256": "02a96bf183234787d255931ca8e9df3e53335a706690d99607f08101ba036489",
+      "size_bytes": 6329
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "dataset_sample_size": 40,
+  "n_positive": 20,
+  "n_negative": 20,
+  "nuisance_features_evaluated": [
+    "n_raw",
+    "n_valid",
+    "missing_fraction",
+    "raw_mean",
+    "raw_median",
+    "est_noise",
+    "noise_sigma_meta",
+    "duration_days"
+  ],
+  "feature_distribution_comparisons": {
+    "n_raw": {
+      "pos_mean": 19728.0,
+      "pos_std": 0.0,
+      "neg_mean": 19728.0,
+      "neg_std": 0.0,
+      "ks_statistic": 0.0,
+      "ks_pvalue": 1.0,
+      "significant_difference": false
+    },
+    "n_valid": {
+      "pos_mean": 18677.4,
+      "pos_std": 11.416654501210063,
+      "neg_mean": 18674.5,
+      "neg_std": 12.839392508993562,
+      "ks_statistic": 0.3,
+      "ks_pvalue": 0.33559098126008213,
+      "significant_difference": false
+    },
+    "missing_fraction": {
+      "pos_mean": 0.05325425790754259,
+      "pos_std": 0.0005787030870442956,
+      "neg_mean": 0.05340125709651257,
+      "neg_std": 0.0006508207881687632,
+      "ks_statistic": 0.3,
+      "ks_pvalue": 0.33559098126008213,
+      "significant_difference": false
+    },
+    "raw_mean": {
+      "pos_mean": 0.9998796558414723,
+      "pos_std": 0.00021326157238628335,
+      "neg_mean": 1.000085583610183,
+      "neg_std": 8.674599016449424e-05,
+      "ks_statistic": 0.65,
+      "ks_pvalue": 0.0002704973445409677,
+      "significant_difference": true
+    },
+    "raw_median": {
+      "pos_mean": 1.0001984014934755,
+      "pos_std": 0.00023121141633934093,
+      "neg_mean": 1.0003311288550143,
+      "neg_std": 0.00020992630354447204,
+      "ks_statistic": 0.35,
+      "ks_pvalue": 0.17453300569806826,
+      "significant_difference": false
+    },
+    "est_noise": {
+      "pos_mean": 0.0018204742085464894,
+      "pos_std": 0.00041709001310662777,
+      "neg_mean": 0.001996115749871965,
+      "neg_std": 0.0004243391142479483,
+      "ks_statistic": 0.3,
+      "ks_pvalue": 0.33559098126008213,
+      "significant_difference": false
+    },
+    "noise_sigma_meta": {
+      "pos_mean": 0.0011304436512091002,
+      "pos_std": 0.00019116264620944347,
+      "neg_mean": 0.001122253524053133,
+      "neg_std": 0.00019978618720911556,
+      "ks_statistic": 0.15,
+      "ks_pvalue": 0.9831368772656193,
+      "significant_difference": false
+    },
+    "duration_days": {
+      "pos_mean": 27.399999999999995,
+      "pos_std": 3.552713678800501e-15,
+      "neg_mean": 27.399999999999995,
+      "neg_std": 3.552713678800501e-15,
+      "ks_statistic": 0.0,
+      "ks_pvalue": 1.0,
+      "significant_difference": false
+    }
+  },
+  "nuisance_only_classification": {
+    "logistic_regression": {
+      "cv_roc_auc": 0.78,
+      "cv_accuracy": 0.75,
+      "shortcut_detected": true
+    },
+    "random_forest": {
+      "cv_roc_auc": 0.7275,
+      "cv_accuracy": 0.675,
+      "shortcut_detected": true
+    }
+  },
+  "conclusion": "POTENTIAL NUISANCE SHORTCUT DETECTED. Models can partially separate classes using non-signal metadata/nuisance variables."
+}
