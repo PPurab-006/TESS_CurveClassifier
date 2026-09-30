@@ -1,0 +1,134 @@
+{
+  "benchmark_metadata": {
+    "run_type": "BOUNDED_EXPLORATORY_PROVISIONAL",
+    "formal_benchmark_qualification": false,
+    "execution_timestamp_utc": "2026-09-30T18:41:05.461123+00:00",
+    "manifest_file": "results/real_data_stage2/stage2_final_cohort_manifest.csv",
+    "total_targets": 100,
+    "confirmed_planet_hosts": 50,
+    "observational_controls": 50,
+    "single_planet_hosts_count": 41,
+    "multi_planet_hosts_count": 9,
+    "multi_planet_tics": [
+      262530407,
+      189013224,
+      92352620,
+      31374837,
+      183532609,
+      307210830,
+      33692729,
+      52368076,
+      251848941
+    ],
+    "protocol_reference": "docs/real_data_benchmark_protocol.md (v1.3.2)",
+    "config_file": "configs/real_benchmark_protocol.yaml",
+    "random_seed": 42,
+    "system_info": {
+      "python_version": "3.11.15",
+      "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+      "astropy_version": "8.0.1",
+      "scikit_learn_version": "1.9.1",
+      "numpy_version": "2.4.6",
+      "pandas_version": "3.0.6"
+    }
+  },
+  "bls_baseline_metrics": {
+    "all_hosts_cohort_n50": {
+      "target_count": 50,
+      "detected_count_sde6_snr5": 49,
+      "detection_rate": 0.98,
+      "recovered_period_count": 46,
+      "period_recovery_rate": 0.92,
+      "fundamental_recovery_count": 46,
+      "fundamental_recovery_rate": 0.92,
+      "harmonic_recovery_count": 0,
+      "harmonic_recovery_rate": 0.0,
+      "median_sde": 15.087973313467366,
+      "median_snr": 85.57955715188137
+    },
+    "single_planet_hosts_subcohort_n41": {
+      "target_count": 41,
+      "detected_count_sde6_snr5": 40,
+      "detection_rate": 0.975609756097561,
+      "recovered_period_count": 39,
+      "period_recovery_rate": 0.9512195121951219,
+      "fundamental_recovery_count": 39,
+      "fundamental_recovery_rate": 0.9512195121951219,
+      "harmonic_recovery_count": 0,
+      "harmonic_recovery_rate": 0.0,
+      "median_sde": 15.282289151526184,
+      "median_snr": 89.45489695109009
+    },
+    "multi_planet_hosts_subcohort_n9": {
+      "target_count": 9,
+      "detected_count_sde6_snr5": 9,
+      "detection_rate": 1.0,
+      "recovered_period_count": 7,
+      "period_recovery_rate": 0.7777777777777778,
+      "fundamental_recovery_count": 7,
+      "fundamental_recovery_rate": 0.7777777777777778,
+      "harmonic_recovery_count": 0,
+      "harmonic_recovery_rate": 0.0,
+      "median_sde": 14.192443332157238,
+      "median_snr": 30.44117960176875
+    },
+    "observational_controls_n50": {
+      "target_count": 50,
+      "candidate_detection_count_sde6_snr5": 25,
+      "candidate_detection_rate": 0.5,
+      "clean_non_detection_count": 25,
+      "clean_non_detection_rate": 0.5,
+      "median_sde": 6.019508489923166,
+      "median_snr": 9.889372245002235,
+      "notes": "Controls are observational non-detections (BDR-005), NOT confirmed planet-free negatives."
+    },
+    "runtime_performance": {
+      "total_search_runtime_sec": 44.87928359396028,
+      "mean_search_runtime_sec_per_target": 0.4487928359396028,
+      "total_elapsed_benchmark_runtime_sec": 46.25370686700626
+    }
+  },
+  "tabular_ml_vetting_metrics": {
+    "RandomForest": {
+      "training_sample_count": 40,
+      "training_time_sec": 0.12849622700014152,
+      "inference_latency_ms_per_target": 0.4932361099781701,
+      "all_hosts_positive_count": 42,
+      "all_hosts_recall_rate": 0.84,
+      "single_planet_hosts_positive_count": 37,
+      "single_planet_hosts_recall_rate": 0.9024390243902439,
+      "multi_planet_hosts_positive_count": 5,
+      "multi_planet_hosts_recall_rate": 0.5555555555555556,
+      "controls_positive_count": 11,
+      "controls_positive_rate": 0.22,
+      "controls_clean_rejection_rate": 0.78
+    },
+    "HistGradientBoosting": {
+      "training_sample_count": 40,
+      "training_time_sec": 0.04479022399755195,
+      "inference_latency_ms_per_target": 0.02132442001311574,
+      "all_hosts_positive_count": 45,
+      "all_hosts_recall_rate": 0.9,
+      "single_planet_hosts_positive_count": 38,
+      "single_planet_hosts_recall_rate": 0.926829268292683,
+      "multi_planet_hosts_positive_count": 7,
+      "multi_planet_hosts_recall_rate": 0.7777777777777778,
+      "controls_positive_count": 3,
+      "controls_positive_rate": 0.06,
+      "controls_clean_rejection_rate": 0.94
+    }
+  },
+  "deep_learning_baseline_status": {
+    "model_name": "CNN1D",
+    "enabled": false,
+    "status": "DISABLED_UNDER_GATE_02_OPTION_C",
+    "reason": "Conditional probation active; qualification gate unmet; excluded from primary benchmark execution."
+  },
+  "protocol_deviations_and_caveats": [
+    "PROVISIONAL/EXPLORATORY RUN: Results do not claim formal benchmark qualification.",
+    "GATE-06 INCOMPLETE: 9/50 host systems have sy_pnum > 1 in NASA Exoplanet Archive (selected via TOI-row pl_pnum=1).",
+    "BDR-005 APPLIED: Observational comparison stars are treated as non-detection controls, not confirmed negatives.",
+    "NO TEST TUNING: Detection thresholds and ML hyperparameters were NOT tuned on this test cohort.",
+    "ZERO DATA LEAKAGE: Feature extraction was strictly per-light-curve; supervised ML models were trained exclusively on disjoint external synthetic data."
+  ]
+}

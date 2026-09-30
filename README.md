@@ -30,7 +30,13 @@ A rigorous computational astrophysics benchmark comparing classical signal proce
   - **Approved Invariant Verification**: All 100 targets strictly satisfy $R_{\text{usable}} \ge 0.80$, $T_{\text{baseline}} \ge 20.0\text{ d}$, strictly increasing timestamps ($\Delta t > 0$, 0 duplicates), zero non-finite cadences, and scalar median normalization ($F / \text{median}(F)$).
   - **Zero Duplicate Stars**: 100 unique TIC IDs across the cohort.
   - **Observational Controls**: Comparison stars are field stars with zero TOI, TCE, or confirmed planet associations in the NASA Exoplanet Archive (observational non-detections, not proven planet-free; BDR-005).
-- **Stage 3 Real-Data Benchmarking (Pending)**: No model training, threshold tuning, or BLS detection benchmarking has been run on the production cohort.
+- **Stage 3 Exploratory Benchmark (Completed Checkpoint - Provisional)**:
+  - **Exploratory Baselines Established**: Executed bounded, exploratory baseline run across all 100 Stage 2 targets using approved primary methods (Astropy BoxLeastSquares and external synthetic-trained tabular ML).
+  - **Zero Leakage**: Photometric ingestion and 22-D feature extraction performed strictly per-target without cross-star normalization; supervised ML baselines trained exclusively on disjoint external synthetic data (zero authentic target leakage); zero test-set threshold tuning.
+  - **1D CNN Disabled**: Kept strictly disabled (`enabled: false`) under approved GATE-02 Option C conditional probation.
+  - **Audit Caveat Tracked**: Explicitly identified and segregated the 9 host systems discovered to have `sy_pnum > 1` in the NASA Exoplanet Archive (admitted under TOI table candidate-row `pl_pnum=1` convention); strict single-planet qualification under GATE-06 remains pending formal resolution.
+  - **Provisional Results**: Isolated in `results/real_benchmark_exploratory/` (BLS period recovery: 95.1% [39/41] on single-planet hosts, 77.8% [7/9] on multi-planet hosts; observational comparison star candidate detection rate: 50.0% [25/50]; HistGradientBoosting comparison star rejection rate: 94.0% [47/50]).
+  - **Formal Benchmark Qualification**: Not claimed; formal Stage 3 benchmarking remains pending.
 
 ---
 
