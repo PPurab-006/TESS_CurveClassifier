@@ -4,9 +4,10 @@ Classical Box Least Squares (BLS) Transit Detection Baseline.
 Wraps Astropy's BoxLeastSquares algorithm with scientific detection criteria,
 Signal Detection Efficiency (SDE), SNR estimation, harmonic checks, and runtime benchmarking.
 """
+import math
 import time
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple, Sequence
 import numpy as np
 from astropy.timeseries import BoxLeastSquares
 
@@ -58,7 +59,12 @@ class BLSResult:
     runtime_sec: float
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def is_period_recovered(self, true_period: float, tolerance: float = 0.02) -> bool:
+    def is_period_recovered(
+        self,
+        true_period: float,
+        tolerance: float = 0.01,
+        accepted_ratios: Optional[Sequence[float]] = None
+    ) -> bool:
         """
         Check if the detected period matches the true period or its common harmonics.
 
@@ -67,22 +73,86 @@ class BLSResult:
         true_period : float
             Ground-truth period.
         tolerance : float
-            Fractional tolerance threshold (e.g. 0.02 = 2%).
+            Fractional tolerance threshold (default 0.01 = 1.0%, approved under GATE-01).
+        accepted_ratios : Optional[Sequence[float]]
+            Candidate harmonic ratios to test. Defaults to approved GATE-04 Option B narrow set: (0.5, 1.0, 2.0).
+            Exploratory sets (such as Option A: [1/3, 0.5, 1.0, 2.0, 3.0]) can be explicitly passed.
 
         Returns
         -------
         bool
-            True if recovered at fundamental or integer harmonic / subharmonic.
+            True if recovered at fundamental or any accepted harmonic / subharmonic.
         """
-        if true_period <= 0 or self.best_period <= 0:
-            return False
+        if accepted_ratios is None:
+            ratios = (0.5, 1.0, 2.0)
+        else:
+            ratios = accepted_ratios
 
-        ratios = [1.0, 0.5, 2.0, 1.0 / 3.0, 3.0]
-        for ratio in ratios:
-            target = true_period * ratio
-            if abs(self.best_period - target) / target <= tolerance:
-                return True
-        return False
+        is_recovered, _, _ = match_period_to_harmonics(
+            detected_period=self.best_period,
+            catalog_period=true_period,
+            accepted_ratios=ratios,
+            tolerance=tolerance
+        )
+        return is_recovered
+
+
+def match_period_to_harmonics(
+    detected_period: float,
+    catalog_period: float,
+    accepted_ratios: Sequence[float] = (0.5, 1.0, 2.0),
+    tolerance: float = 0.01
+) -> Tuple[bool, Optional[float], float]:
+    """
+    Evaluate whether a detected period matches a catalog period under a set of accepted ratios.
+
+    Parameters
+    ----------
+    detected_period : float
+        Period detected by the algorithm in days.
+    catalog_period : float
+        Ground-truth catalog period in days.
+    accepted_ratios : Sequence[float]
+        Candidate harmonic multipliers to test against. Defaults to approved GATE-04 Option B
+        narrow set: (0.5, 1.0, 2.0). Broad exploratory sets can be passed explicitly.
+    tolerance : float
+        Fractional tolerance threshold (approved 0.01 = 1.0% under GATE-01).
+
+    Returns
+    -------
+    Tuple[bool, Optional[float], float]
+        (is_recovered, nearest_ratio, min_relative_error)
+        - is_recovered: True if min_relative_error <= tolerance (with machine-precision allowance).
+        - nearest_ratio: The accepted ratio yielding the lowest relative error, or None if invalid.
+        - min_relative_error: abs(detected_period - ratio * catalog_period) / (ratio * catalog_period).
+    """
+    if (not np.isfinite(detected_period) or not np.isfinite(catalog_period) or
+            detected_period <= 0 or catalog_period <= 0 or tolerance < 0 or
+            not accepted_ratios):
+        return False, None, float("nan")
+
+    # Narrowly bounded machine-precision allowance (100 ULPs ~ 1.7e-16 for tol=0.01)
+    # to ensure exact mathematical boundaries (P_true * (1 +/- tol)) are robust
+    # against IEEE 754 binary floating-point representation artifacts.
+    effective_tol = tolerance + 100 * math.ulp(tolerance) if tolerance > 0 else tolerance
+
+    best_ratio = None
+    min_rel_err = float("inf")
+
+    for ratio in accepted_ratios:
+        if ratio <= 0 or not np.isfinite(ratio):
+            continue
+        target = catalog_period * ratio
+        rel_err = abs(detected_period - target) / target
+        if rel_err < min_rel_err:
+            min_rel_err = rel_err
+            best_ratio = ratio
+
+    if best_ratio is None:
+        return False, None, float("nan")
+
+    is_recovered = (min_rel_err <= effective_tol)
+    return is_recovered, best_ratio, min_rel_err
 
 
 class BLSDetector:

@@ -9,6 +9,7 @@ from .synthetic import (
     preprocess_light_curve,
 )
 from .tess_loader import TESSDataLoader
+from .cohort import CandidateTarget, ValidationRecord, Stage2CohortManager
 
 __all__ = [
     "LightCurveData",
@@ -20,4 +21,8 @@ __all__ = [
     "running_median_detrend",
     "preprocess_light_curve",
     "TESSDataLoader",
+    "CandidateTarget",
+    "ValidationRecord",
+    "Stage2CohortManager",
 ]
+

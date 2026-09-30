@@ -1,0 +1,89 @@
+{
+  "protocol_stage": "Stage 2 Real-Data Cohort Expansion",
+  "execution_date_utc": "2026-09-30T18:14:39.128722+00:00",
+  "wall_clock_runtime_seconds": 132.85919404029846,
+  "target_expansion_counts": {
+    "candidates_searched": 52,
+    "candidates_acquired": 52,
+    "qualified_expansion_total": 51,
+    "qualified_expansion_hosts": 26,
+    "qualified_expansion_controls": 25,
+    "exclusions_and_failures": 1
+  },
+  "expansion_sector_distribution": {
+    "2": {
+      "confirmed_hosts": 9,
+      "observational_controls": 8,
+      "total": 17
+    },
+    "5": {
+      "confirmed_hosts": 8,
+      "observational_controls": 8,
+      "total": 16
+    },
+    "6": {
+      "confirmed_hosts": 9,
+      "observational_controls": 9,
+      "total": 18
+    }
+  },
+  "data_quality_metrics": {
+    "min_baseline_days": 21.774471277946077,
+    "max_baseline_days": 27.40739438310402,
+    "median_baseline_days": 26.199125196576006,
+    "min_usable_cadence_fraction": 0.7996149364138421,
+    "median_usable_cadence_fraction": 0.9270912499366671,
+    "all_monotonic_timestamps": true,
+    "zero_nan_filtered_cadences": true
+  },
+  "failures": [],
+  "exclusions": [
+    {
+      "target_name": "TIC 349788231",
+      "tic_id": 349788231,
+      "category": "control_star",
+      "sector": 2,
+      "cadence_sec": 119.99937438085908,
+      "pipeline": "NASA/Ames",
+      "flux_column": "pdcsap_flux",
+      "tstart_btjd": 1354.106635032517,
+      "tstop_btjd": 1381.513462134293,
+      "duration_days": 27.40682710177589,
+      "n_raw_cadences": 19737,
+      "n_usable_cadences": 15782,
+      "n_quality_rejected": 3955,
+      "usable_cadence_fraction": 0.7996149364138421,
+      "gap_count": 2,
+      "max_gap_days": 1.5624885394977355,
+      "is_strictly_increasing": true,
+      "n_nan_time_filtered": 0,
+      "n_nan_flux_filtered": 0,
+      "n_inf_flux_filtered": 0,
+      "overlaps_predicted_transit": false,
+      "n_predicted_transit_windows": 0,
+      "n_windows_with_cadences": 0,
+      "n_windows_full_coverage": 0,
+      "n_windows_zero_cadence": 0,
+      "is_visually_apparent": false,
+      "fits_filename": "tess2018234235059-s0002-0000000349788231-0121-s_lc.fits",
+      "file_size_bytes": 2004480,
+      "sha256": "a96a9627d27696947c1d073a76377bdb6f86aa4f1f58b1cee4f8979cff8f55f6",
+      "download_source": "NASA MAST (SPOC Pipeline)",
+      "retrieval_date": "2026-09-30",
+      "qa_passed": false,
+      "planet_name": null,
+      "toi_id": null,
+      "period_days": null,
+      "period_err": null,
+      "t0_bjd": null,
+      "t0_err": null,
+      "duration_hours": null,
+      "duration_err": null,
+      "depth_ppm": null,
+      "ephemeris_source": "N/A (Observational Control)",
+      "selection_rationale": "Expansion field star observed in SPOC 120s cadence; zero TOI or confirmed exoplanet records",
+      "acquisition_status": "excluded_qa_failed",
+      "exclusion_reason": "usable_fraction_0.800_lt_0.80"
+    }
+  ]
+}

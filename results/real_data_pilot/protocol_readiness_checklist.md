@@ -30,12 +30,12 @@
 | **Cadence QA** | Quality mask (`QUALITY==0`), NaN/Inf isolation, monotonicity check | `tess_loader.py:load_tess_fits_file()`, `cadence_reconciliation.csv` | None. Reconciled across 10 pilot files with zero double-counting. | Automated test assertion for monotonicity and zero NaN. | **VERIFIED & READY** |
 | **Ephemeris Ground Truth** | Accurate $P, T_0, T_{\text{dur}}$, units, BTJD scale; mid-transit verification; target eligibility bound $\sigma_{t_{\text{mid}}} \le 0.25 T_{\text{dur}}$; error direction of omitting $\operatorname{Cov}(T_0, P)$ governed by $\operatorname{sgn}(E \cdot \operatorname{Cov}(T_0, P))$ | `ephemeris_validation.csv`, `target_inventory.csv` | None for pilot cohort. Need verified TOI table ingest with mid-transit and BTJD verification for expanded cohort. | Source-specific transit midpoint and time-scale verification report; $\sigma_{t_{\text{mid}}} \le 0.25 T_{\text{dur}}$ verification. | **VERIFIED & READY** |
 | **Ephemeris Air-Gap** | Strip all labels and ephemerides before search algorithms | Existing `scripts/run_bls_benchmark.py` accesses `lc.category` | Need dedicated `BlindLightCurve` dataclass and air-gapped runner script (`scripts/run_blind_benchmark.py`). | Unit test verifying algorithm receives only opaque ID and numeric flux arrays. | **GAP: IMPLEMENTATION REQUIRED** |
-| **Classical BLS** | Duration-dependent frequency grid (`GATE-09`), exact API arguments, runtime version & grid serialization mandate (`astropy>=6.0.0` is dependency constraint, not exact pin), formal $\sigma_\delta = \sqrt{\operatorname{Var}(\delta)}$ and $\text{SNR} = \delta / \sigma_\delta$, inverse-variance weighting (`GATE-10`), SDE background specification (`GATE-11`), deterministic tie-breaking | `src/tess_benchmark/baselines/bls.py` (`BLSDetector`) | Need standardized CLI runner recording `astropy.__version__`, environment lockfile, serialized grid array, exact $\sigma_\delta$, SDE alias union mask $\mathcal{E}$, and deterministic tie-breaking. | Automated test verifying grid density, runtime version recording, formal SNR vs SDE decoupling, and runtime profiling. | **GAP: RUNNER & GRID WIRING REQUIRED** |
+| **Classical BLS** | Duration-dependent frequency grid (`GATE-09`, approved: Option A primary, Option B comparative), exact API arguments, runtime version & grid serialization mandate (`astropy>=6.0.0` is dependency constraint, not exact pin), formal $\sigma_\delta = \sqrt{\operatorname{Var}(\delta)}$ and $\text{SNR} = \delta / \sigma_\delta$, inverse-variance weighting (`GATE-10`, approved: Option A), SDE background specification (`GATE-11`, approved: Stage 1 Option A baseline, Stage 2 Option C candidate conditional on Exp 2; $3\Delta f$ mask), deterministic tie-breaking; single-peak extraction implemented, iterative multi-signal search (`GATE-06` Option C) pending future implementation | `src/tess_benchmark/baselines/bls.py` (`BLSDetector`) | Need standardized CLI runner recording `astropy.__version__`, environment lockfile, serialized grid array, exact $\sigma_\delta$, SDE alias union mask $\mathcal{E}$, and deterministic tie-breaking. Iterative search unbuilt. | Automated test verifying grid density, runtime version recording, formal SNR vs SDE decoupling, and runtime profiling. | **GAP: RUNNER & GRID WIRING REQUIRED** |
 | **Tabular ML** | Blind feature extraction and model inference as BLS-candidate vetting classifier | `src/tess_benchmark/features/extractors.py`, `models/classical.py` | Need training script on disjoint external dataset (synthetic/out-of-sector). | Feature vector unit test proving zero label access and disjoint training verification. | **GAP: TRAINING SCRIPT NEEDED** |
-| **1D CNN** | Deep CNN on phase-folded light curves | `src/tess_benchmark/models/cnn1d.py` | Model on probation due to all-positive collapse. Must satisfy dual gate: Specificity $\ge 0.85$ AND Sensitivity $\ge \text{MIN}$ (`GATE-02`). | Validation test report demonstrating dual gate compliance on independent validation split. | **ON PROBATION — CONDITIONAL GAP** |
-| **Scoring Layer** | Decoupled fundamental, harmonic, circular phase epoch alignment under `GATE-12` (Options A, B, C; $0.50 T_{\text{dur}}$ scoring cap), and target-level metrics; Wilson CIs | Evaluator logic in `metrics.py` and `bls.py` | Need unified `RealDataBenchmarkScorer` class implementing decoupled tri-level metrics, circular phase distance, and attrition ledger. | Unit test verifying circular phase distance, confusion matrix, and Wilson CI arithmetic. | **GAP: IMPLEMENTATION REQUIRED** |
-| **Event Adequacy** | Five-tier event hierarchy; baseline via exposure boundaries $[t_{\text{base},\min}, t_{\text{base},\max}]$; continuous temporal coverage $f_{\text{temporal}} \in [0, 1]$ via Lebesgue measure; dual adequacy ($f_{\text{temporal}} \ge 50\%$ AND $N_{\text{valid}} \ge 5$); categorical exclusion of boundary events is PROPOSED under `GATE-03` | `calculate_transit_overlap()` in `tess_loader.py` | Need pre-screening manifest generator calculating continuous temporal coverage, evaluating dual adequacy, and tagging boundary truncations. | Manifest logging excluded events prior to search execution. | **GAP: IMPLEMENTATION REQUIRED** |
-| **Detrending & Outliers** | Segment-wise detrending ($W=1.25\text{ d}$), edge tagging, pre-detrending flare flagging; synthetic injection validation measuring $R_{\text{depth}}$ via local baseline $C_{\text{out}}$, exact model options (Box, Trapezoid, Limb-Darkened) under `GATE-05`, mandatory $f_{\text{fail}}$ reporting with omnibus and convergent distributions, and edge-affected segregation. Threshold pending under `GATE-05`. | `src/tess_benchmark/features/extractors.py` | Ensure detrending filter operates independently per segment without crossing gaps $> 6\text{ h}$; add edge and flare masks; execute synthetic validation reporting $f_{\text{fail}}$ and subgroup distributions. | Test asserting no interpolation across gaps $> 6\text{ hours}$, raw flux immutability, and synthetic validation report across subgroups. | **GAP: IMPLEMENTATION REQUIRED** |
+| **1D CNN** | Deep CNN on phase-folded light curves | `src/tess_benchmark/models/cnn1d.py` | Formal qualification deferred under `GATE-02` Option C. Model remains disabled (`enabled: false`) on conditional probation for Stage 1. Descriptive ROC/PR reporting only if evaluated diagnostically. | Independent validation cohort ($N \ge 100$) required prior to any future admission reconsideration. | **DEFERRED ON PROBATION (STAGE 1 RESOLVED)** |
+| **Scoring Layer** | Decoupled fundamental, harmonic, circular phase epoch alignment under `GATE-12` (approved: Option C bounded composite convention with $0.25 T_{\text{dur}}$ core convention and $0.50 T_{\text{dur}}$ scoring cap), target-level metrics; Wilson CIs; single-planet primary cohort, one-to-one matching, planet-level and system-level metrics for segregated multi-planet fallback cohort under `GATE-06` Option C | Evaluator logic in `metrics.py` and `bls.py` | Need unified `RealDataBenchmarkScorer` class implementing decoupled tri-level metrics, circular phase distance, one-to-one candidate matching, and attrition ledger. | Unit test verifying circular phase distance, confusion matrix, one-to-one candidate matching, and Wilson CI arithmetic. | **GAP: IMPLEMENTATION REQUIRED** |
+| **Event Adequacy** | Five-tier event hierarchy; baseline via exposure boundaries $[t_{\text{base},\min}, t_{\text{base},\max}]$; continuous temporal coverage $f_{\text{temporal}} \in [0, 1]$ via Lebesgue measure; dual adequacy ($f_{\text{temporal}} \ge 50\%$ AND $N_{\text{valid}} \ge 5$ on fully interior events); secondary boundary diagnostic track ($f_{\text{temporal}} \ge 30\%$ AND $N_{\text{valid}} \ge 3$) under `GATE-03` Option 2 | `calculate_transit_overlap()` in `tess_loader.py` | Need pre-screening manifest generator calculating continuous temporal coverage, evaluating dual adequacy, and routing boundary truncations to secondary track. Note: current loader uses discrete cadence-count approximation. | Manifest logging excluded events and boundary diagnostic ledger prior to search execution. | **GAP: IMPLEMENTATION REQUIRED** |
+| **Detrending & Outliers** | Primary preprocessing uses native SPOC PDCSAP with scalar median normalization only (zero additional filter-induced attenuation; no filter detrending). Secondary sensitivity track uses segment-wise running median ($W=1.25\text{ d}$) in separate diagnostic ledger; Option 3 robust biweight spline deferred for future validation (`GATE-05` Option 4, approved). Synthetic injection validation mandatory before promoting any filter to primary; 1% vs 2% $f_{\text{fail}}$ threshold discrepancy unresolved. | `src/tess_benchmark/features/extractors.py` | Ensure primary pipeline passes native normalized PDCSAP; implement secondary running median diagnostic track; resolve 1% vs 2% failure-rate discrepancy before any filter promotion. | Pre-execution verification that primary path runs un-detrended PDCSAP and secondary track outputs are segregated. | **RESOLVED FOR BENCHMARK (GATE-05 APPROVED)** |
 
 ---
 
@@ -82,14 +82,14 @@
   - Automated unit test asserting that passing a `BlindLightCurve` with random permutations of opaque IDs produces identical detector results.
 
 ### Requirement 4: Classical BLS Baseline Reproducibility & SDE Specification
-- **Protocol Mandate**: Run Astropy BLS with duration-dependent frequency grid (`GATE-09`), exact API arguments `BoxLeastSquares.autoperiod(duration, minimum_period=0.5, maximum_period=15.0, frequency_factor=5.0, minimum_n_transit=2)`. Pinned dependency specification `astropy>=6.0.0` is an inequality constraint, NOT an exact version pin; implementation must record runtime `astropy.__version__`, export environment lockfile, and serialize generated frequency grid array to persistent storage (`bls_frequency_grid.npy`). Formal depth variance $\operatorname{Var}(\delta) = (\sum_{\text{in}} w_i)^{-1} + (\sum_{\text{out}} w_j)^{-1}$ with standard error $\sigma_\delta = \sqrt{\operatorname{Var}(\delta)}$ and $\text{SNR} = \delta / \sigma_\delta$, inverse-variance weighting (`GATE-10`), SDE background specification with full composite alias mask $\mathcal{E}$ (`GATE-11`), and deterministic tie-breaking. Oversampling calibration restricted to synthetic injections.
+- **Protocol Mandate**: Run Astropy BLS with duration-dependent frequency grid (`GATE-09`, approved: Option A primary, Option B comparative), exact API arguments `BoxLeastSquares.autoperiod(duration, minimum_period=0.5, maximum_period=15.0, frequency_factor=5.0, minimum_n_transit=2)`. Pinned dependency specification `astropy>=6.0.0` is an inequality constraint, NOT an exact version pin; implementation must record runtime `astropy.__version__`, export environment lockfile, and serialize generated frequency grid array to persistent storage (`bls_frequency_grid.npy`). Formal depth variance $\operatorname{Var}(\delta) = (\sum_{\text{in}} w_i)^{-1} + (\sum_{\text{out}} w_j)^{-1}$ with standard error $\sigma_\delta = \sqrt{\operatorname{Var}(\delta)}$ and $\text{SNR} = \delta / \sigma_\delta$, inverse-variance weighting (`GATE-10`, approved: Option A), SDE background specification with full composite alias mask $\mathcal{E}$ and $3\Delta f$ fundamental peak exclusion (`GATE-11`, approved: Stage 1 Option A baseline, Stage 2 Option C candidate conditional on Exp 2), and deterministic tie-breaking. Oversampling calibration restricted to synthetic injections.
 - **Existing Implementation**:
   - `src/tess_benchmark/baselines/bls.py:BLSDetector` supports basic Astropy BLS wrapping.
 - **Missing Implementation**:
   - Wire duration-dependent grid construction (`autoperiod`) with explicit parameters.
   - Record runtime `astropy.__version__` and serialize frequency grid array to disk.
   - Ensure $\sigma_\delta$ incorporates the square root and is decoupled from SDE.
-  - Implement SDE background exclusion mask $\mathcal{E}$ (Options A, B, C, D pending under `GATE-11`).
+  - Implement SDE background exclusion mask $\mathcal{E}$ (Stage 1 uses unclipped Option A; Option C candidate for Stage 2 conditional on Experiment 2).
   - Implement deterministic tie-breaking (lower period selected on identical power).
   - Add isolated wall-clock runtime profiling around `BLSDetector.search()`.
 - **Evidence Required**:
@@ -106,19 +106,19 @@
 - **Evidence Required**:
   - Verification that training data contains **zero** stars from the real-data benchmark cohort.
 
-### Requirement 6: 1D CNN Dual Validation Gate on Probation
-- **Protocol Mandate**: CNN must not be included in the primary benchmark until it passes the dual validation gate: Specificity $\ge 0.85$ AND Sensitivity $\ge \text{MIN}$ (`GATE-02`) on an independent validation set.
+### Requirement 6: 1D CNN Deferred Qualification on Conditional Probation (GATE-02 Option C)
+- **Protocol Mandate (GATE-02 Option C, Approved 2026-09-30)**: Formal numerical admission qualification is deferred for Stage 1. The 1D CNN remains disabled (`enabled: false`) in the benchmark suite and on conditional probation. Reconsideration of admission requires an external, disjoint validation cohort ($N \ge 100$, $\ge 50$ hosts and $\ge 50$ controls) with proper probability calibration.
 - **Existing Implementation**:
   - `src/tess_benchmark/models/cnn1d.py` implements `TransitCNN1DNet`.
-  - Historical output `results/post_audit_repair/model_comparison.csv` documents FPR = 1.0 (all-positive collapse).
-- **Missing Implementation**:
-  - Remediation branch: Implement focal loss or class-balanced loss, blind candidate phase folding, and threshold calibration.
-  - Remediation validation report showing Specificity $\ge 0.85$ and Sensitivity compliance on an independent validation dataset.
+  - Historical output `results/metrics/model_comparison.json` documents FPR = 1.0 (all-positive collapse on imbalanced test split).
+- **Follow-up / Reconsideration Requirements (Post-Stage 1)**:
+  - Remediation branch: Implement focal loss or class-balanced loss, blind candidate phase folding, and out-of-sample threshold calibration on external validation stars.
+  - Assembled external validation cohort ($N \ge 100$) before formal admission thresholds can be established or evaluated.
 - **Evidence Required**:
-  - Validation test report verifying non-degenerate predictions before code is merged into the real-data benchmark suite.
+  - Independent validation test report with non-degenerate predictions across all four confusion matrix quadrants before model can be admitted to Stage 2.
 
 ### Requirement 7: Decoupled Scoring Layer
-- **Protocol Mandate**: Scoring layer evaluates frozen detector predictions against ground truth, computing fundamental-period recovery, harmonic recovery, circular phase epoch alignment under `GATE-12` (Options A, B, C; $0.50 T_{\text{dur}}$ scoring cap), target-level classification metrics, and Wilson score confidence intervals.
+- **Protocol Mandate**: Scoring layer evaluates frozen detector predictions against ground truth, computing fundamental-period recovery, harmonic recovery, circular phase epoch alignment under `GATE-12` (approved: Option C bounded composite convention with $0.25 T_{\text{dur}}$ core convention and $0.50 T_{\text{dur}}$ scoring cap), target-level classification metrics, and Wilson score confidence intervals.
 - **Existing Implementation**:
   - `src/tess_benchmark/evaluation/metrics.py:compute_metrics()` computes basic classification metrics.
   - `BLSResult.is_period_recovered()` checks basic harmonic ratios.
@@ -126,7 +126,7 @@
   - Create `tess_benchmark.evaluation.benchmark_scorer.RealDataBenchmarkScorer` implementing:
     - Exact circular phase distance formula:
       $$\Delta \phi = \left| \left( \left( \frac{t_{0,\text{det}} - t_{\text{mid}, k}}{P_{\text{true}}} + 0.5 \right) \pmod 1 \right) - 0.5 \right|$$
-    - Matching condition: $\Delta t_0 = \Delta \phi \cdot P_{\text{true}} \le \Delta t_{0,\text{tol}}$ according to approved GATE-12 option.
+    - Matching condition: $\Delta t_0 = \Delta \phi \cdot P_{\text{true}} \le \Delta t_{0,\text{tol}}$ according to approved GATE-12 Option C bounded composite convention.
     - Propagation of $T_0$ to nearest observed transit midtime $t_{\text{mid}, k}$.
     - Decoupled target-level, fundamental-period, harmonic-period, and event-level evaluation.
     - Separation of comparison-star detection rate from confirmed false positives.
@@ -156,30 +156,30 @@
 Before running any benchmark code on real TESS targets, verify that all 12 researcher decision gates have been formally approved:
 
 ```
-[ ] GATE-01: Period matching tolerance formally approved [AWAITING APPROVAL]
-    (Proposed: relative epsilon_P = 1.0%; Alternative: Fourier resolution limit)
-[ ] GATE-02: CNN dual validation gate approved [AWAITING APPROVAL]
-    (Proposed: Specificity >= 0.85, Sensitivity >= 0.75; Alternative: 0.90 / 0.80)
-[ ] GATE-03: Window temporal & cadence adequacy criterion approved [AWAITING APPROVAL]
-    (Proposed: f_temporal >= 50% AND N_valid >= 5; categorical exclusion of boundary events)
-[ ] GATE-04: Harmonic set definition approved [AWAITING APPROVAL]
-    (Proposed: H = {1/3, 1/2, 2, 3}; Alternative: H = {1/2, 2})
-[ ] GATE-05: Detrending filter type, fitting model, and acceptance threshold approved [AWAITING APPROVAL]
-    (Proposed: Running median W=1.25 d, Box model, candidate R_depth >= 0.95, mandatory f_fail reporting)
-[ ] GATE-06: Multi-planet handling policy approved [AWAITING APPROVAL]
-    (Proposed: restrict primary cohort to single confirmed hosts)
-[ ] GATE-07: Search range boundaries approved [AWAITING APPROVAL]
-    (Proposed: P in [0.5, 15.0] days)
-[ ] GATE-08: Stage 2 production cohort size approved [AWAITING APPROVAL]
-    (Proposed: 50 hosts, 50 comparison stars)
-[ ] GATE-09: BLS frequency grid construction method approved [AWAITING APPROVAL]
-    (Proposed: adaptive autoperiod with f_factor=5.0; record runtime version, args, and serialized grid)
-[ ] GATE-10: BLS flux weighting model approved [AWAITING APPROVAL]
-    (Proposed: inverse-variance weighting; Alternative: uniform weighting)
-[ ] GATE-11: SDE background distribution method approved [AWAITING APPROVAL]
-    (Proposed: Option A unclipped; preserve Options B, C, D with full composite alias mask E)
-[ ] GATE-12: Epoch matching tolerance formula approved [AWAITING APPROVAL]
-    (Proposed: Option C bounded composite with 0.25*Tdur detector resolution/scoring term and 0.50*Tdur scoring cap)
+[X] GATE-01: Period matching tolerance formally approved [APPROVED: Option A, 1.0%]
+    (Approved 2026-09-30: fixed relative epsilon_P = 1.0%; Fourier resolution limit rejected)
+[X] GATE-02: CNN dual validation gate approved [APPROVED: Option C, Formal Qualification Deferred]
+    (Approved 2026-09-30: formal numerical thresholds deferred for Stage 1; 1D CNN disabled on conditional probation; descriptive ROC/PR reporting permitted diagnostically)
+[X] GATE-03: Window temporal & cadence adequacy criterion approved [APPROVED: Option 2, Secondary Diagnostic Track]
+    (Approved 2026-09-30: Target baseline >= 20.0 d, usable ratio >= 0.80; Primary event f_temporal >= 50% AND N_valid >= 5 for fully interior transits; Secondary boundary track with f_temporal >= 30% AND N_valid >= 3 reported as N_boundary_recovered / N_boundary_adequate)
+[X] GATE-04: Harmonic set definition approved [APPROVED: Option B, {1/2, 1, 2}]
+    (Approved 2026-09-30: narrow set H = {1/2, 2}; 1/3 and 3 rejected for formal scoring; paired pilot comparison showed parity)
+[X] GATE-05: Detrending policy approved [APPROVED: Option 4, Paired Evaluation]
+    (Approved 2026-09-30: Primary native SPOC PDCSAP with scalar median normalization only; Secondary sensitivity track with running median W=1.25 d segregated in diagnostic ledger; Option 3 robust biweight spline deferred; 1% vs 2% failure-rate threshold discrepancy unresolved)
+[X] GATE-06: Multi-planet handling policy approved [APPROVED: Option C, Iterative Multi-Signal Recovery]
+    (Approved 2026-09-30: Primary benchmark cohort restricted to single-planet hosts; sector-expansion fallback hierarchy seeking >= 50 single-planet hosts before admitting multi-planet fallback cohort; multi-planet cohort strictly segregated in reporting; iterative multi-signal recovery methodology approved with implementation details [signal-removal method, stopping criteria, max signals, significance thresholds] pending future validation; current BLS code extracts single peak only)
+[X] GATE-07: Search range boundaries approved [APPROVED: Option A, P in [0.5, 15.0] days]
+    (Approved 2026-09-30: min period 0.5 d; nominal max 15.0 d clamped to 0.95x usable baseline; 25 d periodic search rejected; single-transit events treated in future track; LHS 3844 b pilot detection near 0.925 d is 2x harmonic recovery under GATE-04, not fundamental recovery)
+[X] GATE-08: Stage 2 production cohort size approved [APPROVED: Option A, N=100 Target Cohort]
+    (Approved 2026-09-30: target N=100 total [50 confirmed hosts, 50 observational comparison stars across Sectors 1–5]; target counts for Stage 2, not yet acquired/verified; Stage 1 executes on N=10 pilot first; comparison stars are non-detection controls; N=100 provides basis for future CNN reconsideration under GATE-02 but doesn't qualify CNN; GATE-06 single-planet goal preserved)
+[X] GATE-09: BLS frequency grid construction method approved [APPROVED: Option A Primary, Option B Comparison]
+    (Approved 2026-09-30: Option A adaptive autoperiod f_factor=5.0 primary; Option B uniform-frequency N_freq>=25,000 comparison; 5/5 pilot recovery for both)
+[X] GATE-10: BLS flux weighting model approved [APPROVED: Option A, Inverse-Variance Weighting]
+    (Approved 2026-09-30: inverse-variance weighting w_i = 1/sigma_i^2 passed via dy to Astropy BLS; uniform weighting retained as secondary sensitivity analysis; no new experiment claimed)
+[X] GATE-11: SDE background distribution method approved [APPROVED: Stage 1 Option A Baseline, Stage 2 Option C Candidate]
+    (Approved 2026-09-30: Option A all-finite parametric mean/std approved for Stage 1 baseline; Option C alias-aware union mask E + robust MAD is intended Stage 2 candidate conditional on Experiment 2; peak-exclusion half-width standardized to 3*delta_f resolving INC-02; Experiment 2 planned comparison unchanged and not yet run)
+[X] GATE-12: Epoch matching tolerance formula approved [APPROVED: Option C, Bounded Composite Convention]
+    (Approved 2026-09-30: Delta t0_tol = min(0.50*Tdur, sqrt((0.25*Tdur)^2 + (3*sigma_tmid)^2)); 0.25*Tdur is normative central-core alignment convention, 0.50*Tdur cap is normative scoring convention; protocol conventions, not empirically calibrated; one-to-one matching; GATE-04 harmonic bookkeeping; scoring implementation pending)
 [ ] EXEC-01: Air-gap wrapper (BlindLightCurve) implemented and verified leak-free.
 [ ] EXEC-02: Stage 1 Feasibility Run executed on existing 10 pilot stars with zero threshold tuning.
 [ ] EXEC-03: Stage 1 results reviewed and software execution certified bug-free.
@@ -188,4 +188,4 @@ Before running any benchmark code on real TESS targets, verify that all 12 resea
 ```
 
 > [!IMPORTANT]
-> **Validation Status Notice**: No empirical validation of detection performance or protocol safeguards has been performed. Existing automated unit tests validate software unit correctness only. All 12 researcher decision gates remain strictly `AWAITING RESEARCHER APPROVAL`. Do not begin benchmark execution or model evaluation until gates are formally resolved.
+> **Validation Status Notice**: All 12 protocol decision gates (GATE-01 through GATE-12) are now formally approved and recorded. No empirical validation of detection performance or protocol safeguards has been performed on flight data. Existing automated unit tests validate software unit correctness only. Do not begin Stage 1 benchmark execution until pre-execution items EXEC-01 through EXEC-05 are verified.

@@ -1,0 +1,40 @@
+{
+  "analysis": "GATE-04 Paired Harmonic Set Sensitivity Comparison",
+  "scope": "Exploratory sensitivity analysis on authentic real TESS Sector 1 pilot cohort",
+  "disclaimer": "Pilot cohort is exploratory (N=5 hosts); results are NOT statistically generalizable.",
+  "status": "GATE-04 REMAINS PENDING RESEARCHER APPROVAL",
+  "gate_01_tolerance": 0.01,
+  "eligible_target_count": 5,
+  "option_a": {
+    "name": "Option A (Broad)",
+    "accepted_ratios": [
+      0.3333333333333333,
+      0.5,
+      1.0,
+      2.0,
+      3.0
+    ],
+    "recovered_count": 5,
+    "recovered_fraction": 1.0
+  },
+  "option_b": {
+    "name": "Option B (Narrow)",
+    "accepted_ratios": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "recovered_count": 5,
+    "recovered_fraction": 1.0
+  },
+  "recovered_both": [
+    "WASP-126",
+    "WASP-46",
+    "WASP-91",
+    "LHS 3844",
+    "WASP-124"
+  ],
+  "recovered_only_option_a": [],
+  "recovered_only_option_b": [],
+  "additional_recoveries_attributable_to_third_or_triple": 0
+}

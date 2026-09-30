@@ -1,0 +1,63 @@
+{
+  "protocol_stage": "Stage 2 Consolidated Final Cohort",
+  "execution_date_utc": "2026-09-30T18:14:50.720000+00:00",
+  "target_goals": {
+    "total_targets": 100,
+    "confirmed_planet_hosts": 50,
+    "observational_controls": 50
+  },
+  "achieved_counts": {
+    "final_total_targets": 100,
+    "final_confirmed_planet_hosts": 50,
+    "final_observational_controls": 50,
+    "multi_planet_fallback_admitted": 0,
+    "target_reached": true
+  },
+  "cohort_lineage": {
+    "initial_candidates_searched": 100,
+    "initial_targets_acquired": 100,
+    "initial_targets_qualified": 59,
+    "initial_qualified_hosts": 29,
+    "initial_qualified_controls": 30,
+    "initial_exclusions": 41,
+    "expansion_candidates_searched": 52,
+    "expansion_targets_acquired": 52,
+    "expansion_targets_qualified": 51,
+    "expansion_hosts_qualified": 26,
+    "expansion_controls_qualified": 25,
+    "expansion_hosts_admitted": 21,
+    "expansion_controls_admitted": 20
+  },
+  "final_sector_distribution": {
+    "1": {
+      "confirmed_hosts": 9,
+      "observational_controls": 10,
+      "total": 19
+    },
+    "2": {
+      "confirmed_hosts": 19,
+      "observational_controls": 18,
+      "total": 37
+    },
+    "5": {
+      "confirmed_hosts": 18,
+      "observational_controls": 18,
+      "total": 36
+    },
+    "6": {
+      "confirmed_hosts": 4,
+      "observational_controls": 4,
+      "total": 8
+    }
+  },
+  "data_quality_metrics": {
+    "min_baseline_days": 21.77447127794608,
+    "max_baseline_days": 27.88365836395201,
+    "median_baseline_days": 27.406496130163532,
+    "min_usable_cadence_fraction": 0.8078228707503673,
+    "median_usable_cadence_fraction": 0.9104403267583184,
+    "all_monotonic_timestamps": true,
+    "zero_nan_filtered_cadences": true,
+    "all_positive_uncertainties": true
+  }
+}

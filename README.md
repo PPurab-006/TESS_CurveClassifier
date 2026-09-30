@@ -21,6 +21,17 @@ A rigorous computational astrophysics benchmark comparing classical signal proce
 5. **Leakage Prevention**: Strictly enforce star-level group partitioning (`StarGroupSplitter`) to guarantee zero data leakage between training and testing sets.
 6. **Scientific Rigor**: Disentangle transit detection, candidate classification, and exoplanet validation. Synthetic data is used exclusively for software verification and controlled stress testing.
 
+## 📍 Project Status & Milestone Tracking
+
+- **Synthetic Validation Suite (Completed)**: 80 synthetic stellar systems with controlled injection-recovery, 22-D feature extraction, classical ML, and 1D CNN verification.
+- **Stage 1 Feasibility Pilot (Completed)**: Verified SPOC PDCSAP loading, scalar median normalization, inverse-variance weighting, and BLS period recovery on 10 Sector 1 targets.
+- **Stage 2 Production Cohort Acquisition & Validation (Completed)**:
+  - **100 Qualified Targets**: Exactly 50 confirmed single-planet hosts ($P \in [0.5, 15.0]\text{ d}$) and 50 observational comparison stars across TESS Sectors 1, 2, 5, and 6.
+  - **Approved Invariant Verification**: All 100 targets strictly satisfy $R_{\text{usable}} \ge 0.80$, $T_{\text{baseline}} \ge 20.0\text{ d}$, strictly increasing timestamps ($\Delta t > 0$, 0 duplicates), zero non-finite cadences, and scalar median normalization ($F / \text{median}(F)$).
+  - **Zero Duplicate Stars**: 100 unique TIC IDs across the cohort.
+  - **Observational Controls**: Comparison stars are field stars with zero TOI, TCE, or confirmed planet associations in the NASA Exoplanet Archive (observational non-detections, not proven planet-free; BDR-005).
+- **Stage 3 Real-Data Benchmarking (Pending)**: No model training, threshold tuning, or BLS detection benchmarking has been run on the production cohort.
+
 ---
 
 ## 📁 Repository Structure
@@ -32,7 +43,8 @@ tess-transit-benchmark/
 ├── .gitignore                           # Excludes raw FITS data, checkpoints, and caches
 ├── configs/
 │   ├── default.yaml                     # Global benchmark & model hyperparameters
-│   └── synthetic_benchmark.yaml         # Synthetic validation suite parameters
+│   ├── synthetic_benchmark.yaml         # Synthetic validation suite parameters
+│   └── real_benchmark_protocol.yaml     # Real-data benchmark protocol & decision records
 ├── data/
 │   ├── raw/                             # Cached TESS FITS files (ignored by git)
 │   ├── interim/                         # Intermediate detrended / folded data (ignored by git)
@@ -41,10 +53,11 @@ tess-transit-benchmark/
 ├── src/
 │   └── tess_benchmark/
 │       ├── __init__.py
-│       ├── data/                        # Protocols, schemas, synthetic generator, TESS loader
+│       ├── data/                        # Protocols, schemas, synthetic generator, TESS loader, cohort manager
 │       │   ├── protocol.py              # Provenance enums, LightCurveData container
 │       │   ├── synthetic.py             # Configurable synthetic light curve generator
-│       │   └── tess_loader.py           # NASA MAST & Exoplanet Archive interface
+│       │   ├── tess_loader.py           # NASA MAST & Exoplanet Archive interface
+│       │   └── cohort.py                # Stage 2 candidate selection, acquisition, and validation
 │       ├── features/                    # Feature extraction and phase-folding routines
 │       │   ├── folding.py               # Phase folding, binning, local/global views
 │       │   └── extractors.py            # 22-D tabular physical/statistical feature extractor
@@ -65,8 +78,10 @@ tess-transit-benchmark/
 │   ├── generate_synthetic_benchmark.py  # Generates synthetic light curve validation dataset
 │   ├── run_bls_benchmark.py             # Executes Astropy BLS baseline benchmark
 │   ├── train_evaluate_models.py         # Trains and benchmarks all supervised ML algorithms
-│   └── run_robustness_suite.py          # Runs controlled degradation sweeps (noise, gaps, depth)
-├── tests/                               # Comprehensive unit and integration test suite (29 tests)
+│   ├── run_robustness_suite.py          # Runs controlled degradation sweeps (noise, gaps, depth)
+│   ├── run_stage1_feasibility.py        # Runs Stage 1 feasibility on Sector 1 pilot
+│   └── run_stage2_acquisition.py        # Acquires, validates, and consolidates Stage 2 cohort
+├── tests/                               # Comprehensive unit and integration test suite (71 tests)
 │   ├── test_synthetic.py
 │   ├── test_preprocessing.py
 │   ├── test_bls.py
@@ -76,16 +91,19 @@ tess-transit-benchmark/
 │   ├── test_splitting.py
 │   ├── test_robustness.py
 │   ├── test_utils.py
-│   └── test_loader.py
+│   ├── test_loader.py
+│   ├── test_stage1_feasibility.py
+│   └── test_stage2_acquisition.py
 ├── results/
 │   ├── figures/                         # Diagnostic figures, periodograms, comparison plots
 │   ├── metrics/                         # CSV and JSON benchmark results
-│   └── logs/                            # Run execution logs
+│   ├── real_data_pilot/                 # Stage 1 pilot artifacts, manifests, and run report
+│   └── real_data_stage2/                # Stage 2 production cohort manifests, reports, summaries
 └── docs/
     ├── research_plan.md                 # Detailed research questions, hypotheses, roadmap
-    ├── dataset_protocol.md              # Provenance, MAST/NExScI APIs, target categories
-    ├── experimental_protocol.md         # Group-aware splitting, model training, metrics
-    └── decision_log.md                  # Architectural and astrophysical decision records
+    ├── real_data_benchmark_protocol.md  # Formal real-data benchmark protocol
+    ├── benchmark_decision_log.md        # Protocol decision log (GATE-01 through GATE-12)
+    └── protocol_gate_decision_worksheet_v1_3_2.md # Decision brief and options worksheet
 ```
 
 ---
@@ -110,9 +128,9 @@ uv pip install -e ".[dev]"
 
 ### 3. Run Test Suite
 ```bash
-PYTHONPATH= pytest tests/
+env -u PYTHONPATH pytest tests/
 ```
-All 29 tests will execute, verifying synthetic generation, preprocessing, Astropy BLS periodograms, 22-D feature extraction, classical ML models, the PyTorch 1D CNN, group splitting with zero leakage, and controlled degradation transformations.
+All 71 tests will execute, verifying synthetic generation, preprocessing, Astropy BLS periodograms, 22-D feature extraction, classical ML models, the PyTorch 1D CNN, group splitting with zero leakage, controlled degradation transformations, and Stage 2 cohort validation invariants.
 
 ---
 

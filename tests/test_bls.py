@@ -54,7 +54,7 @@ def test_bls_rejects_pure_noise_control():
 
 
 def test_bls_harmonic_period_recovery():
-    """Verify is_period_recovered correctly identifies 1x, 0.5x, and 2x harmonics."""
+    """Verify is_period_recovered correctly enforces approved GATE-04 Option B default {0.5, 1, 2} and supports explicit sets."""
     from tess_benchmark.baselines.bls import BLSResult
 
     dummy_res = BLSResult(
@@ -71,14 +71,125 @@ def test_bls_harmonic_period_recovery():
         runtime_sec=0.1
     )
 
-    # Fundamental period matches
-    assert dummy_res.is_period_recovered(6.0, tolerance=0.02) is True
-    # Half harmonic (true period is 12.0, detected is 6.0)
-    assert dummy_res.is_period_recovered(12.0, tolerance=0.02) is True
-    # Double harmonic (true period is 3.0, detected is 6.0)
-    assert dummy_res.is_period_recovered(3.0, tolerance=0.02) is True
-    # Unrelated period
-    assert dummy_res.is_period_recovered(7.8, tolerance=0.02) is False
+    # 1. Fundamental period matches using approved default {0.5, 1.0, 2.0} and 0.01 tolerance
+    assert dummy_res.is_period_recovered(6.0) is True
+    # 2. Half harmonic (true period is 12.0, detected is 6.0 -> ratio 0.5)
+    assert dummy_res.is_period_recovered(12.0) is True
+    # 3. Double harmonic (true period is 3.0, detected is 6.0 -> ratio 2.0)
+    assert dummy_res.is_period_recovered(3.0) is True
+
+    # 4. Default formal rule REJECTS 1/3x and 3x (GATE-04 Option B approved rule)
+    # One-third subharmonic (true period is 18.0, detected is 6.0 -> ratio 1/3)
+    assert dummy_res.is_period_recovered(18.0) is False
+    # Triple harmonic (true period is 2.0, detected is 6.0 -> ratio 3.0)
+    assert dummy_res.is_period_recovered(2.0) is False
+
+    # 5. Callers can explicitly pass broad exploratory set without changing formal default
+    broad_ratios = [1.0 / 3.0, 0.5, 1.0, 2.0, 3.0]
+    assert dummy_res.is_period_recovered(18.0, accepted_ratios=broad_ratios) is True
+    assert dummy_res.is_period_recovered(2.0, accepted_ratios=broad_ratios) is True
+
+    # 6. Unrelated period fails under both
+    assert dummy_res.is_period_recovered(7.8) is False
+    assert dummy_res.is_period_recovered(7.8, accepted_ratios=broad_ratios) is False
+
+
+def test_bls_period_recovery_tolerance_gate_01():
+    """
+    Test GATE-01 approved fixed 1.0% relative period-recovery tolerance.
+
+    Verifies across multiple catalog periods (1.0 d, 2.0 d, 10.0 d):
+    - Exact period recovery (error = 0%) -> pass
+    - Upper and lower exact 1% mathematical boundaries (P * 1.01, P * 0.99) -> pass
+    - Just-inside boundary cases (0.99% relative error) -> pass
+    - Just-outside boundary cases (1.01% relative error) -> fail
+    - Invalid, nonpositive, and non-finite catalog periods -> fail safely
+    """
+    from tess_benchmark.baselines.bls import BLSResult
+
+    def make_result(period: float) -> BLSResult:
+        return BLSResult(
+            best_period=period,
+            best_t0=1.0,
+            best_duration=0.2,
+            best_depth=0.005,
+            max_power=10.0,
+            mean_power=2.0,
+            std_power=1.0,
+            sde=8.0,
+            snr=10.0,
+            is_detected=True,
+            runtime_sec=0.1
+        )
+
+    # Test periods across benchmark range: short (1.0 d), intermediate (2.0 d), long (10.0 d)
+    test_periods = [1.0, 2.0, 10.0]
+
+    for p_true in test_periods:
+        # 1. Exact recovery (0.0% error) -> should pass
+        res_exact = make_result(p_true)
+        assert res_exact.is_period_recovered(p_true) is True
+
+        # 2. Upper exact 1% boundary (P_det = P_true * 1.01) -> should pass
+        res_boundary_upper = make_result(p_true * 1.01)
+        assert res_boundary_upper.is_period_recovered(p_true) is True
+
+        # 3. Lower exact 1% boundary (P_det = P_true * 0.99) -> should pass
+        res_boundary_lower = make_result(p_true * 0.99)
+        assert res_boundary_lower.is_period_recovered(p_true) is True
+
+        # 4. Just inside boundary (0.99% error) -> should pass
+        res_inside_upper = make_result(p_true * 1.0099)
+        assert res_inside_upper.is_period_recovered(p_true) is True
+
+        res_inside_lower = make_result(p_true * 0.9901)
+        assert res_inside_lower.is_period_recovered(p_true) is True
+
+        # 5. Just outside boundary (1.01% error) -> should fail
+        res_outside_upper = make_result(p_true * 1.0101)
+        assert res_outside_upper.is_period_recovered(p_true) is False
+
+        res_outside_lower = make_result(p_true * 0.9899)
+        assert res_outside_lower.is_period_recovered(p_true) is False
+
+    # Explicit literal decimal boundary tests for P = 1.0, 2.0, 10.0
+    assert make_result(1.01).is_period_recovered(1.0) is True
+    assert make_result(0.99).is_period_recovered(1.0) is True
+    assert make_result(1.0101).is_period_recovered(1.0) is False
+    assert make_result(0.9899).is_period_recovered(1.0) is False
+
+    assert make_result(2.02).is_period_recovered(2.0) is True
+    assert make_result(1.98).is_period_recovered(2.0) is True
+    assert make_result(2.0202).is_period_recovered(2.0) is False
+    assert make_result(1.9798).is_period_recovered(2.0) is False
+
+    assert make_result(10.1).is_period_recovered(10.0) is True
+    assert make_result(9.9).is_period_recovered(10.0) is True
+    assert make_result(10.101).is_period_recovered(10.0) is False
+    assert make_result(9.899).is_period_recovered(10.0) is False
+
+    # 6. Invalid / nonpositive / non-finite catalog periods -> fail safely
+    res_valid = make_result(10.0)
+    assert res_valid.is_period_recovered(0.0) is False
+    assert res_valid.is_period_recovered(-5.0) is False
+    assert res_valid.is_period_recovered(float("nan")) is False
+    assert res_valid.is_period_recovered(float("inf")) is False
+    assert res_valid.is_period_recovered(float("-inf")) is False
+
+    # Also invalid best_period in result
+    res_zero = BLSResult(
+        best_period=0.0, best_t0=0.0, best_duration=0.0, best_depth=0.0,
+        max_power=0.0, mean_power=0.0, std_power=1.0, sde=0.0, snr=0.0,
+        is_detected=False, runtime_sec=0.0
+    )
+    assert res_zero.is_period_recovered(10.0) is False
+
+    res_nan = BLSResult(
+        best_period=float("nan"), best_t0=0.0, best_duration=0.0, best_depth=0.0,
+        max_power=0.0, mean_power=0.0, std_power=1.0, sde=0.0, snr=0.0,
+        is_detected=False, runtime_sec=0.0
+    )
+    assert res_nan.is_period_recovered(10.0) is False
 
 
 def test_bls_insufficient_data_handling():

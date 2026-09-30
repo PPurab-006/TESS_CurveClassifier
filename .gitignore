@@ -56,6 +56,7 @@ data/processed/*
 # Results & Artifacts
 results/logs/*
 !results/logs/.gitkeep
+results/real_data_pilot/stage1/plots/
 *.pt
 *.pth
 *.joblib

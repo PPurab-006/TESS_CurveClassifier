@@ -138,12 +138,20 @@ A candidate host is eligible for inclusion in the confirmed host cohort if and o
      *(Detailed mathematical analysis of the cross-term $2 E \operatorname{Cov}(T_0, P)$ and catalog zero-covariance limitations in Section 6.2.4).*
    - **Crucial Methodological Distinction**: This inequality is strictly a **pre-benchmarking target eligibility filter** that ensures catalog ground-truth ephemerides are sufficiently precise across the observation sector to permit rigorous scoring. Targets failing this criterion are excluded a priori and logged in the target attrition ledger. **This ephemeris eligibility threshold must not be conflated with the detected-epoch matching tolerance $\Delta t_{0,\text{tol}}$** (evaluated in Section 6.2.3 and governed by `GATE-12`), which measures how closely a detector's recovered transit center matches the true midtime.
 4. **Period Search Range Compatibility**:
-   - Primary benchmark search range is $P \in [0.5, 15.0]\text{ days}$.
-   - Hosts with $P > 15.0\text{ days}$ cannot be recovered at their fundamental period within a 15-day search grid.
-   - *Status*: `GATE-07` (`REQUIRES_RESEARCHER_APPROVAL`) whether long-period hosts are excluded from the primary cohort or evaluated strictly for event-level recovery.
+   - Primary benchmark search range is $P \in [0.5, 15.0]\text{ days}$, clamped to $0.95 \times \text{usable observation baseline}$.
+   - Hosts with $P > 15.0\text{ days}$ cannot be recovered at their fundamental period within a 15-day search grid; single-transit events are treated as a separate future event-detection track, not as periodic BLS recoveries.
+   - *Status*: `GATE-07` (**APPROVED: Option A**, 2026-09-30). Minimum search period is retained at 0.5 days; nominal maximum search period is set to 15.0 days, clamped to $0.95 \times \text{usable observation baseline}$. The primary periodic BLS search is not extended to 25 days. Pilot target note: LHS 3844 b catalog period ($\approx 0.4629\text{ d}$) is below 0.5 d; its pilot detection near $0.92535\text{ d}$ is a $2\times$ harmonic recovery under approved GATE-04 Option B, NOT a fundamental-period recovery. This is a pilot-specific observation and not generalized to other targets.
 5. **Multi-Planet Systems**:
-   - Single-peak BLS is designed for single periodic signals. In multi-planet systems, mutual transits or secondary planets introduce unmodeled variance.
-   - *Status*: `GATE-06` (`REQUIRES_RESEARCHER_APPROVAL`) whether multi-planet systems are excluded from the primary benchmark cohort or scored strictly against the dominant (highest transit depth) planet.
+   - Single-peak BLS is designed for single periodic signals; in multi-planet systems, mutual transits or secondary planets introduce unmodeled variance.
+   - *Status*: `GATE-06` (**APPROVED: Option C, Iterative Multi-Signal Recovery**, 2026-09-30).
+     - **Primary Benchmark Cohort**: Restricted strictly to qualified confirmed single-planet hosts.
+     - **Cohort Fallback Hierarchy**: First expand the observing sector range (e.g., Sectors 1–10) to seek at least 50 qualified single-planet hosts. If and only if the available single-planet pool remains below 50 after this expanded-sector inventory, multi-planet systems are permitted as a fallback cohort.
+     - **Strict Cohort Segregation**: Multi-planet systems must remain separately identified and reported in all tables, figures, and summaries; silent pooling with the primary single-planet cohort is prohibited.
+     - **Methodology & Protocol Requirements**: Iterative multi-signal recovery must detect a candidate signal, remove or account for that signal's contribution to the light curve, and repeat the BLS search for additional signals until a predefined stopping condition is reached.
+     - **Pending Implementation Parameters**: The exact signal-removal method (in-transit masking vs. model subtraction/pre-whitening), significance thresholds (minimum SDE/SNR per iteration), maximum candidate count per target, and stopping parameters remain explicitly pending a separate future implementation and validation decision. Neither method is selected in this gate.
+     - **Matching & Scoring Rules**: Requires strict one-to-one matching between detected candidate signals and eligible catalogued planets (one detected signal cannot count toward multiple planets). Enforces the approved GATE-04 Option B narrow harmonic policy ($\mathcal{H} = \{1/2, 1, 2\}$ within the approved GATE-01 $1.0\%$ relative tolerance), recording fundamental vs. harmonic/alias recovery. Evaluates planet-level recovery rate, false-positive candidate counts, system-level any-planet recovery, and complete-system recovery.
+     - **Current Software State**: Existing BLS code (`src/tess_benchmark/baselines/bls.py`) extracts only the single global maximum peak and does not yet implement, test, or validate iterative multi-signal recovery.
+     - **Observational Controls**: Comparison stars without detected TOIs/TCEs remain defined as observational non-detection controls, not proven planet-free stars.
 6. **Predeclared Recovery Eligibility Rules**:
    - **Eligible for Period Recovery**: Must exhibit $\ge 2$ predicted transit windows with adequate cadence coverage within the observed sector.
    - **Eligible for Event-Level Recovery**: Must exhibit $\ge 1$ predicted transit window with adequate cadence coverage.
@@ -218,21 +226,18 @@ To prevent data snooping, the software architecture enforces a strict physical s
 ```
 
 ### 4.2 Preprocessing, Detrending, and Transit Preservation Validation
-1. **Label-Blind Normalization**:
+1. **Primary Preprocessing: Label-Blind Normalization (APPROVED: GATE-05 Option 4)**:
    $$F_{\text{norm}}(t_i) = \frac{F_{\text{raw}}(t_i)}{\text{median}(F_{\text{raw}}[\text{valid}])}$$
-   Normalization is performed across all unflagged, finite cadences without masking known transit windows.
-2. **Detrending Window Specification**:
-   To prevent detrending filters from filtering out genuine transit dips, the filter window must satisfy:
-   $$W_{\text{detrend}} \ge \max\left(3 \times T_{\text{dur, max}}, \quad 1.05\text{ days}\right)$$
-   For $T_{\text{dur, max}} = 0.3333\text{ days}$ ($8.0\text{ hours}$), $3 \times T_{\text{dur, max}} = 1.0\text{ day}$. For $T_{\text{dur, max}} = 0.35\text{ days}$ ($8.4\text{ hours}$), $3 \times T_{\text{dur, max}} = 1.05\text{ days}$.
-   The proposed detrending window is:
-   $$W_{\text{detrend}} = 1.25\text{ days} \quad (30.0\text{ hours}) \quad \text{[PROPOSED CANDIDATE — AWAITING RESEARCHER APPROVAL under GATE-05]}$$
-   *(Status: Specific filter algorithm [running median vs biweight spline] is `GATE-05` `REQUIRES_RESEARCHER_APPROVAL`).*
-3. **Risk of Transit Attenuation by Unmasked Running Median**:
+   - Primary benchmark preprocessing uses native NASA SPOC `PDCSAP_FLUX` with scalar median normalization across all unflagged, finite cadences without masking known transit windows.
+   - **No additional filter detrending** is applied in the primary benchmark path. This guarantees zero additional filter-induced transit depth attenuation or duration distortion from this benchmark's detrending stage (without claiming that native SPOC PDCSAP itself has zero total attenuation).
+2. **Secondary Sensitivity Track (Segment-Wise Running Median)**:
+   - A segment-wise running median filter ($W_{\text{detrend}} = 1.25\text{ days}$, $30.0\text{ hours}$) is evaluated as an independent secondary sensitivity comparison in a segregated diagnostic ledger.
+   - Results from this secondary track are strictly isolated and never combined with primary benchmark scores or qualification claims.
+   - **Deferred Method**: Option 3 (robust biweight spline detrending, $W=1.25\text{ d}$) is parked as deferred, not rejected. It is not implemented or evaluated at this stage; any future consideration requires a separate researcher decision and validation plan.
+3. **Risk of Transit Attenuation & Air-Gap Constraint**:
    - Because catalog ephemerides are strictly air-gapped during blind detection, transit masking is unavailable during search preprocessing.
-   - For an unmasked running median with window $W_{\text{detrend}} = 30\text{ hours}$, a transit of duration $T_{\text{dur}} = 6\text{--}8\text{ hours}$ occupies $20\text{--}27\%$ of the window. In pure white noise, a running median remains unaffected as long as in-transit points occupy $< 50\%$ of the window.
-   - However, in the presence of steep stellar variability, stellar flares, or data gaps, the running median can partially track the transit dip, causing transit depth attenuation and ingress/egress distortion.
-   - **Protocol Invariant**: The protocol **does not claim** that the 1.25-day running median preserves transit signals without attenuation until empirical validation has been executed.
+   - For an unmasked running median with window $W_{\text{detrend}} = 30\text{ hours}$, transits of duration $T_{\text{dur}} \in [6, 8]\text{ hours}$ occupy $20\text{--}27\%$ of the window, creating depth attenuation risk in the presence of noise or gaps. Primary evaluation on native PDCSAP completely bypasses this risk.
+   - **Protocol Invariant**: The protocol **does not claim** that unmasked running median detrending preserves transit signals without attenuation until empirical validation has been executed.
 4. **Mandatory Synthetic-Injection Detrending Validation Procedure**:
    Before freezing the preprocessing pipeline for production runs, a dedicated detrending validation experiment must be executed on external flight calibration curves:
    - **Signal Injection**: Inject synthetic limb-darkened transit models (Mandel & Agol 2002) with known physical depths $\delta_{\text{inj}} = (R_p / R_*)^2 \in [500, 25000]\text{ ppm}$, durations $T_{\text{dur}} \in [1.0, 8.0]\text{ hours}$, and periods $P \in [0.5, 15.0]\text{ days}$ into quiet observational comparison light curves.
@@ -273,8 +278,9 @@ To prevent data snooping, the software architecture enforces a strict physical s
      - Duration bins: short ($[1.0, 3.0]\text{ h}$), medium ($[3.0, 5.0]\text{ h}$), long ($[5.0, 8.0]\text{ h}$).
      - Period bins: short ($[0.5, 3.0]\text{ d}$), medium ($[3.0, 10.0]\text{ d}$), long ($[10.0, 15.0]\text{ d}$).
      - Proximity to edges: interior ($|t - t_{\text{edge}}| > W/2$) vs boundary-adjacent ($|t - t_{\text{edge}}| \le W/2$).
-   - **Acceptance Threshold Status**:
-     Proposed candidate thresholds: Median $R_{\text{depth}} \ge 0.95$ for $T_{\text{dur}} \le 6.0\text{ hours}$, $R_{\text{depth}} \ge 0.90$ for $T_{\text{dur}} \in [6.0, 8.0]\text{ hours}$, and failure rate $f_{\text{fail}} \le 0.02$. **All acceptance thresholds are PROPOSED CANDIDATES strictly pending researcher approval under `GATE-05` and are NOT pre-approved.**
+   - **Acceptance Threshold Status & Failure Rate Discrepancy**:
+     Candidate thresholds for detrending filter qualification: Median $R_{\text{depth}} \ge 0.95$ for $T_{\text{dur}} \le 6.0\text{ hours}$ and $R_{\text{depth}} \ge 0.90$ for $T_{\text{dur}} \in [6.0, 8.0]\text{ hours}$.
+     *Failure Rate Discrepancy*: The maximum acceptable failure rate threshold is inconsistent across documents ($f_{\text{fail}} \le 0.02$ [2.0%] here vs $f_{\text{fail}} \le 0.01$ [1.0%] in `configs/real_benchmark_protocol.yaml` line 47). This discrepancy is recorded as **unresolved** under approved GATE-05 Option 4 and explicitly requires a separate researcher decision before any detrending filter could be qualified or promoted to the primary pipeline.
 5. **Segment-Wise Processing and Gap Handling**:
    - Detrending filters must **never** smooth or interpolate across telemetry gaps $> 6.0\text{ hours}$.
    - Detrending must be executed independently per continuous observation segment.
@@ -348,7 +354,7 @@ $$\Delta f(P) \le \frac{q}{f_{\text{factor}} \cdot T_{\text{usable}}} = \frac{\m
   Implementation must record these parameters rather than relying on unpinned library resolution.
 - **Calibration Isolation**:
   The oversampling factor $f_{\text{factor}}$ (proposed candidate: 5.0) directly governs periodogram grid density ($10,000\text{--}50,000$ points) and execution runtime. Tuning $f_{\text{factor}}$ on benchmark targets constitutes subtle data snooping. Calibration must be performed **strictly on external synthetic injection light curves** with known periods and durations, evaluating recovery completeness versus runtime. Tuning on real benchmark labels is strictly prohibited.
-- **Decision Gate**: The specific frequency grid construction method remains governed by `GATE-09` (`REQUIRES_RESEARCHER_APPROVAL`).
+- **Decision Gate [APPROVED 2026-09-30]**: Governed by `GATE-09`. Option A (Astropy `autoperiod()` with $f_{\text{factor}}=5.0$) is approved as the **primary benchmark grid** based on 5/5 pilot recovery with low compute latency ($\approx 0.50\text{ s}$/target). Option B (explicit uniform frequency grid with $N_{\text{freq}} \ge 25,000, \Delta f \le 0.00008\text{ d}^{-1}$) is approved as a **controlled sensitivity comparison grid**. Pilot results are preserved and qualified as preliminary feasibility checks, not general proofs of superiority.
 
 #### 5.1.2 Duration Grid, Model Formulation, and Background Distribution
 1. **Duration Grid Construction**:
@@ -382,6 +388,7 @@ $$\Delta f(P) \le \frac{q}{f_{\text{factor}} \cdot T_{\text{usable}}} = \frac{\m
      The variance of the transit depth $\delta = -\beta_1$ is the lower-right diagonal element:
      $$\operatorname{Var}(\delta) = \operatorname{Var}(\beta_1) = \frac{\sum_{\text{all}} w_i}{(\sum_{\text{out}} w_j)(\sum_{\text{in}} w_i)} = \frac{\sum_{\text{in}} w_i + \sum_{\text{out}} w_j}{(\sum_{\text{out}} w_j)(\sum_{\text{in}} w_i)} = \frac{1}{\sum_{i \in \text{in}} w_i} + \frac{1}{\sum_{j \in \text{out}} w_j}$$
      which yields the identical standard error $\sigma_\delta = \sqrt{\operatorname{Var}(\delta)}$ and $\text{SNR} = \delta / \sigma_\delta$.
+     - *BLS Flux Weighting Status (`GATE-10`)*: **APPROVED: Option A (Inverse-Variance Weighting)**, 2026-09-30. The primary BLS baseline uses inverse-variance weighting ($w_i = 1/\sigma_i^2$) computed from normalized SPOC flux errors and passed via `dy` to Astropy BoxLeastSquares. Uniform weighting ($w_i = 1$) is retained as an approved future secondary sensitivity analysis in a separate diagnostic ledger.
 
 3. **Formal Decoupling of Physical SNR and Spectral SDE**:
    - **Signal-to-Noise Ratio (SNR)**: Evaluates the physical significance of the observed transit dip relative to photometric noise ($\text{SNR} = \delta / \sigma_\delta$).
@@ -395,7 +402,7 @@ $$\Delta f(P) \le \frac{q}{f_{\text{factor}} \cdot T_{\text{usable}}} = \frac{\m
    - **Invalid Frequency Bins**: Any frequency bin where $P_m$ is non-finite (NaN, Inf), uncalculated, or non-positive ($P_m \le 0$) is masked into $\mathcal{I}_{\text{invalid}}$ prior to statistical evaluation. If fewer than 50 valid frequency bins remain ($|\mathcal{P}_{\text{valid}}| < 50$), SDE cannot be reliably computed; the detector must return $\text{SDE} = \text{NaN}$ with an explicit boolean flag `sde_degenerate = True`.
    - **Peak, Harmonic, and Alias Identification**:
      When peak and harmonic exclusion is applied:
-     1. *Fundamental Peak Exclusion*: $E_0 = [f_0 - \Delta f_{\text{excl}}, \, f_0 + \Delta f_{\text{excl}}]$, where the exclusion half-width is $\Delta f_{\text{excl}} = 2 \Delta f_{\text{peak}} = 2 / (T_{\text{dur, min}} \times f_{\text{factor}})$.
+     1. *Fundamental Peak Exclusion*: $E_0 = [f_0 - \Delta f_{\text{excl}}, \, f_0 + \Delta f_{\text{excl}}]$, where the exclusion half-width is standardized to $\Delta f_{\text{excl}} = 3 \Delta f$ (3 frequency-grid spacings), resolving INC-02 and harmonizing protocol text with YAML configuration and Decision Log.
      2. *Orbital Harmonics*: Frequencies at integer multiples $f_{\text{harm}, j} = j \cdot f_0$ for $j \in \{2, 3\}$.
      3. *Orbital Subharmonics*: Frequencies at integer submultiples $f_{\text{sub}, j} = f_0 / j$ for $j \in \{2, 3\}$.
      4. *Spacecraft Orbital Aliases*: Frequencies offset by the TESS orbital frequency: $f_{\text{alias}, \pm} = f_0 \pm f_{\text{orbit}}$, where $f_{\text{orbit}} = 1 / (13.7\text{ days}) \approx 0.0730\text{ d}^{-1}$.
@@ -406,13 +413,13 @@ $$\Delta f(P) \le \frac{q}{f_{\text{factor}} \cdot T_{\text{usable}}} = \frac{\m
      All frequency bins falling within $\mathcal{E}$ are masked out simultaneously. Taking the formal union guarantees that overlapping regions do not double-count exclusions or cause array indexing errors.
    - **Background Power Population**:
      $$\mathcal{P}_{\text{bg}} = \{ P_m \in \mathcal{P} : f_m \notin \mathcal{E} \quad \text{and} \quad m \notin \mathcal{I}_{\text{invalid}} \}$$
-   - **Preserved Decision Gate Options (`GATE-11`)**:
-     The mathematical formulation of periodogram background statistics $(\mu_{\text{bg}}, \sigma_{\text{bg}})$ is an unresolved methodological choice. The protocol preserves four explicit options:
-     - *Option A (All Frequencies Unclipped)*: Parametric mean and standard deviation computed over all valid frequencies $\mathcal{P}_{\text{valid}}$, including the peak and harmonics.
+   - **Preserved Decision Gate Options and Approval Status (`GATE-11`)**:
+     The mathematical formulation of periodogram background statistics $(\mu_{\text{bg}}, \sigma_{\text{bg}})$ is governed by `GATE-11` (**APPROVED**, 2026-09-30):
+     - *Option A (All Frequencies Unclipped) [APPROVED STAGE 1 BASELINE]*: Parametric mean and standard deviation computed over all valid frequencies $\mathcal{P}_{\text{valid}}$, including the peak and harmonics. Approved as the baseline for Stage 1 feasibility execution (matching existing code in `src/tess_benchmark/baselines/bls.py`).
      - *Option B (Peak-Excluded Robust MAD)*: Mask strictly $E_0$; compute $\mu_{\text{robust}} = \operatorname{median}(\mathcal{P}_{\text{valid}} \setminus E_0)$ and $\sigma_{\text{robust}} = 1.4826 \times \operatorname{MAD}(\mathcal{P}_{\text{valid}} \setminus E_0)$.
-     - *Option C (Peak-, Harmonic-, and Alias-Excluded Robust MAD)*: Mask the full union $\mathcal{E}$; compute robust median and Normalized MAD over $\mathcal{P}_{\text{bg}}$.
+     - *Option C (Peak-, Harmonic-, and Alias-Excluded Robust MAD) [APPROVED STAGE 2 CANDIDATE]*: Mask the full union $\mathcal{E}$; compute robust median and Normalized MAD over $\mathcal{P}_{\text{bg}}$. Recorded as the intended Stage 2 production candidate, strictly conditional on the designated Experiment 2 comparison. Option C is NOT described as empirically selected, validated, or adopted as the final production method before Experiment 2 is completed and reviewed.
      - *Option D (Iterative $3\sigma$-Clipped Parametric)*: Iteratively reject bins $> 3\sigma$ from the mean until convergence.
-     *(Status: All options remain PROPOSED CANDIDATES strictly AWAITING RESEARCHER APPROVAL under `GATE-11`. No option may be selected based on real pilot outcomes).*
+     *(Experiment 2 planned comparison remains unchanged and has not yet been executed).*
 5. **Deterministic Tie-Breaking**:
    If multiple frequency points yield identical objective power within $10^{-8}$, the lower orbital period (higher frequency) is deterministically selected.
 6. **Isolated Timing Protocol**:
@@ -432,17 +439,14 @@ $$\Delta f(P) \le \frac{q}{f_{\text{factor}} \cdot T_{\text{usable}}} = \frac{\m
   - Grouping by star (`StarGroupSplitter`) strictly enforces that all observations of any star stay exclusively in either the training or test partition.
 - **Threshold Calibration**: The probability decision threshold $p_{\text{thresh}}$ must be calibrated on an independent validation set, never on the real-TESS benchmark test targets.
 
-### 5.3 1D Convolutional Neural Network (CNN) — Dual Validation Gate on Probation
-- **Historical Defect**: In the synthetic benchmark repair, `TransitCNN1DNet` suffered complete all-positive collapse (TP=4, FP=6, TN=0, FN=0; Specificity = 0.0, FPR = 1.0) due to uncalibrated logits under class imbalance.
-- **Why Specificity Alone Is Insufficient**:
-  An all-negative classifier (predicting 0 on every target) achieves Specificity = 1.0 and FPR = 0.0, but Recall = 0.0. A single specificity threshold can be satisfied by a completely broken, insensitive model.
-- **Mandatory Dual Validation Gate**:
-  The 1D CNN is **barred** from the primary benchmark suite and will remain on conditional probation until it passes a comprehensive validation audit on an independent validation set:
-  1. **Specificity Gate**: $\text{Specificity} \ge 0.85$ ($\text{FPR} \le 0.15$).
-  2. **Sensitivity Gate**: $\text{Sensitivity / Recall} \ge \text{MIN\_SENSITIVITY}$ (*`GATE-02` `REQUIRES_RESEARCHER_APPROVAL`, proposed candidate: $\ge 0.75$*).
-  3. **Full Confusion Matrix Review**: Inspection of non-zero counts across all four quadrants ($TP > 0, TN > 0, FP, FN$).
-  4. **Blind Phase-Folding**: Light curves folded strictly using the candidate period found by the blind BLS search, never the catalog ephemeris.
-  5. **Independent Calibration**: Threshold and hyperparameter calibration performed on a separate validation split, never on the real-TESS benchmark test cohort.
+### 5.3 1D Convolutional Neural Network (CNN) — Deferred Qualification on Conditional Probation (GATE-02 Option C)
+- **Historical Defect**: In the synthetic benchmark repair, `TransitCNN1DNet` suffered complete all-positive collapse (TP=4, FP=6, TN=0, FN=0; Specificity = 0.0, FPR = 1.0) on imbalanced test data due to uncalibrated logits and sample starvation ($N_{\text{train}}=30$).
+- **Approved Protocol Policy (GATE-02 Option C, Approved 2026-09-30)**:
+  Under formal researcher decision `GATE-02` (Option C), formal numerical pass/fail admission thresholds (such as candidate $\text{Specificity} \ge 0.85$ or $\text{Sensitivity} \ge 0.75$) are **deferred** for Stage 1:
+  1. **Disabled in Stage 1 Benchmark**: The 1D CNN baseline remains disabled (`enabled: false`) and on conditional probation. Primary benchmark scoring is restricted to Classical BLS and 22-D Tabular ML baselines.
+  2. **Diagnostic & Descriptive Only**: If the CNN is evaluated in secondary exploratory runs, all threshold-dependent metrics and ROC/PR curves must be reported descriptively, without treating them as formal benchmark qualification or claiming transit validation competence.
+  3. **Reconsideration Standard**: Formal numerical admission gates will only be reconsidered when an adequately sized, disjoint independent validation cohort (e.g. $N \ge 100$, with $\ge 50$ hosts and $\ge 50$ controls) is assembled, featuring proper probability calibration and out-of-sample threshold tuning.
+  4. **Safeguards Preserved**: Any diagnostic evaluation must continue to enforce blind phase-folding (folded strictly by blind BLS period, never catalog ephemeris) and zero test-star leakage.
 
 ---
 
@@ -474,11 +478,12 @@ For each target in the cohort, the scoring layer assigns exactly one of the foll
 #### 6.2.1 Fundamental Period Matching
 $$\frac{|P_{\text{det}} - P_{\text{true}}|}{P_{\text{true}}} \le \epsilon_P$$
 Standard relative tolerance is $\epsilon_P = 0.01$ ($1.0\%$).
-*(Status: `GATE-01` `REQUIRES_RESEARCHER_APPROVAL` whether grid-dependent tolerance $\Delta f \cdot P^2$ is supported).*
+*(Status: `GATE-01` APPROVED [Option A: Fixed 1.0% relative tolerance $\epsilon_P = 0.01$; period-dependent/grid-dependent $\Delta f \cdot P^2$ and Fourier-derived formulas rejected]).*
 
 #### 6.2.2 Harmonic Period Matching
 Let ratio $r = P_{\text{det}} / P_{\text{true}}$. The detection is a harmonic recovery if:
-$$\min_{h \in \mathcal{H}} \frac{|r - h|}{h} \le \epsilon_P, \quad \text{where } \mathcal{H} = \left\{\frac{1}{3}, \frac{1}{2}, 2, 3\right\}$$
+$$\min_{h \in \mathcal{H}} \frac{|r - h|}{h} \le \epsilon_P, \quad \text{where } \mathcal{H} = \left\{\frac{1}{2}, 2\right\}$$
+*(Status: `GATE-04` APPROVED [Option B: Narrow harmonic set $\mathcal{H} = \{1/2, 2\}$; accepted period ratios $\{1/2, 1, 2\}$. Ratios $1/3$ and $3$ are rejected for formal recovery scoring. Paired exploratory comparison on the 5 Sector 1 pilot hosts showed parity (5/5 under both options) and did not distinguish them; Option B was selected as the formal operational definition to prevent spurious alias inflation]).*
 **Harmonic recoveries must be reported separately and never silently counted as fundamental period recoveries.**
 
 #### 6.2.3 Circular Phase Distance Epoch Alignment
@@ -490,16 +495,15 @@ Physical time offset is:
 $$\Delta t_0 = \Delta \phi \cdot P_{\text{true}}$$
 An epoch match is declared satisfied if:
 $$\Delta t_0 \le \Delta t_{0,\text{tol}}$$
-where the exact mathematical definition of $\Delta t_{0,\text{tol}}$ is an unresolved methodological choice governed strictly by `GATE-12` (`REQUIRES_RESEARCHER_APPROVAL`):
+where the exact mathematical definition of $\Delta t_{0,\text{tol}}$ is governed by `GATE-12` (**APPROVED: Option C Bounded Composite Convention**, 2026-09-30):
 - **Option A (Physical Transit Dip Overlap)**: $\Delta t_{0,\text{tol}} = 0.50 \times T_{\text{dur}}$ (requires detected center to fall within physical 1st-to-4th contact window $[-T_{\text{dur}}/2, +T_{\text{dur}}/2]$).
 - **Option B (Transit Core / Flat-Bottom Overlap)**: $\Delta t_{0,\text{tol}} = 0.25 \times T_{\text{dur}}$ (stricter alignment within central transit core).
-- **Option C (Bounded Composite Formulation)**:
+- **Option C [APPROVED] (Bounded Composite Formulation)**:
   $$\Delta t_{0,\text{tol}} = \min\left(0.50 \times T_{\text{dur}}, \quad \sqrt{(0.25 \times T_{\text{dur}})^2 + (3 \times \sigma_{t_{\text{mid}}})^2}\right)$$
-  - *Interpretation of the $0.25 \times T_{\text{dur}}$ Term*: This term represents either:
-    1. **Detector Phase Resolution**: An empirical bound on the detector's discrete phase grid spacing ($\Delta t_{\text{grid}} / 2$) or the empirical dispersion $\sigma_{\text{det}}$ of recovered midpoints. If interpreted as detector resolution, it must be formally measured or calibrated on synthetic injection light curves rather than assumed.
-    2. **Scoring Convention**: A normative policy buffer allocated to ensure recovered midpoints fall near the central core of the dip.
-  - *Interpretation of the $0.50 \times T_{\text{dur}}$ Cap*: The clamping bound $\min(0.50 \times T_{\text{dur}}, \dots)$ is strictly a **scoring convention** enforcing that no detection whose estimated midpoint lies outside the physical 1st-to-4th contact dip ($|t - t_{\text{mid}}| > 0.50 T_{\text{dur}}$) can be rewarded as a True Positive. It is **NOT a statistical confidence bound** (formal Gaussian propagation $\sqrt{\sigma_{\text{det}}^2 + (3\sigma_{t_{\text{mid}}})^2}$ can exceed $0.50 T_{\text{dur}}$ for low SNR or large $E_k$, but scoring policy refuses credit beyond 4th contact).
-*(All three options remain PROPOSED CANDIDATES strictly AWAITING RESEARCHER APPROVAL under `GATE-12`).*
+  - *Normative Meaning of Terms*:
+    1. **$0.25 \times T_{\text{dur}}$ Term**: Adopted as the **normative central-core alignment convention**.
+    2. **$0.50 \times T_{\text{dur}}$ Cap**: The clamping bound $\min(0.50 \times T_{\text{dur}}, \dots)$ is strictly a **normative scoring convention** enforcing that no detection whose estimated midpoint lies outside the physical 1st-to-4th contact dip ($|t - t_{\text{mid}}| > 0.50 T_{\text{dur}}$) can be rewarded as a True Positive. It is **NOT a statistical confidence bound**.
+    Both terms are explicitly defined as **protocol conventions**, NOT empirically calibrated tolerances. Requires strict one-to-one candidate-to-catalog-planet matching and GATE-04 harmonic bookkeeping. Epoch matching scoring implementation in code is currently pending in `RealDataBenchmarkScorer`.
 
 #### 6.2.4 General Ephemeris Variance Formulation and Covariance Limitations
 The general variance of a predicted transit midtime at integer epoch offset $E_k$ from reference epoch $T_0$ is:
@@ -593,9 +597,9 @@ Across all predicted transit events, the protocol defines five mutually exclusiv
 - **Cadence Count Ratio**:
   $$R_{\text{cadence}, k} = \frac{N_{\text{valid}, k}}{N_{\text{expected}, k}} = \frac{N_{\text{valid}, k}}{\lceil T_{\text{dur}} / \Delta t_{\text{nominal}} \rceil}$$
   *(Only $R_{\text{cadence}, k}$ may exceed 1.0 due to timing jitter or boundary overlap; $f_{\text{temporal}, k}$ is the continuous temporal fraction strictly bounded in $[0, 1]$).*
-- **Dual Adequacy Rule**:
-  An event is adequately observed if and only if BOTH criteria are simultaneously met:
-  $$f_{\text{temporal}, k} \ge f_{\text{min}} \quad (\text{PROPOSED: } 50\%) \quad \text{AND} \quad N_{\text{valid}, k} \ge N_{\text{min}} \quad (\text{PROPOSED: } 5)$$
+- **Dual Adequacy Rule (APPROVED: GATE-03 Option 2)**:
+  An event is adequately observed for primary benchmark scoring if and only if BOTH criteria are simultaneously met on a fully interior transit window:
+  $$f_{\text{temporal}, k} \ge 0.50 \quad \text{AND} \quad N_{\text{valid}, k} \ge 5$$
   **Prohibition on Cadence-Only Adequacy**: A minimum cadence count alone (e.g. $N_{\text{valid}} \ge 5$) does **not** qualify as adequate coverage. For example, 5 cadences clustered in a 10-minute segment of an 8-hour transit spans only $2\%$ temporal coverage, missing $98\%$ of the physical dip. Both temporal span and point count are mandatory.
 
 #### 7.2.4 Sector-Boundary Truncation and Denominator Policy
@@ -605,18 +609,18 @@ For event $k$ with window $[t_{\text{start}, k}, t_{\text{end}, k}] = [t_{\text{
    - Ingress-truncated: $t_{\text{start}, k} < t_{\text{base},\min} \le t_{\text{end}, k}$.
    - Egress-truncated: $t_{\text{start}, k} \le t_{\text{base},\max} < t_{\text{end}, k}$.
    - Wholly out-of-baseline: $t_{\text{end}, k} < t_{\text{base},\min}$ OR $t_{\text{start}, k} > t_{\text{base},\max}$.
-3. **Partial Event Treatment as a Pending Methodological Choice (`GATE-03` / Boundary Handling)**:
-   The treatment of boundary-truncated events is an unresolved methodological choice preserved for researcher approval:
-   - *Option 1 (Proposed: Categorical Exclusion)*: Categorically disqualify partial events from $N_{\text{adequate}}$ and exclude them from the event-recovery denominator. Rationale: missing ingress or egress prevents verification of transit profile symmetry and distorts recovered depth/duration.
-   - *Option 2 (Partial Recovery Evaluation)*: Allow partial events to be evaluated if their observed portion satisfies a scaled adequacy threshold (e.g. $f_{\text{temporal}} \ge 50\%$ of the truncated duration), testing detector sensitivity to truncated signals.
-   - *Option 3 (Segregated Diagnostic Track)*: Exclude partial events from primary $N_{\text{adequate}}$, but report partial-event recovery rate as a secondary exploratory diagnostic.
-   *(Status: Categorical exclusion is a PROPOSED CANDIDATE strictly AWAITING RESEARCHER APPROVAL; it is NOT an approved active default).*
-4. **Denominator Isolation Under Proposed Policy**:
-   Under the proposed categorical exclusion policy:
-   - "Sector-Boundary Truncated" events are excluded from the event-recovery denominator.
-   - "Not Observed / Zero Cadence" (downlink gap) events are excluded from the event-recovery denominator.
-   - "Insufficient Coverage" events ($N_{\text{valid}} < 5$ or $f_{\text{temporal}} < 50\%$) are excluded from the event-recovery denominator.
-   - The event-recovery denominator consists strictly of **Adequately Covered Events** ($N_{\text{adequate}}$), which must be fully interior to the observation baseline and satisfy both $f_{\text{temporal}} \ge 50\%$ and $N_{\text{valid}} \ge 5$.
+3. **Approved Boundary Event Policy (`GATE-03` Option 2: Dual Adequacy with Segregated Secondary Diagnostic Track)**:
+   - *Primary Metric Exclusivity*: Only fully interior events ($W_{\text{event}, k} \subset [t_{\text{base},\min}, t_{\text{base},\max}]$) satisfying $f_{\text{temporal}} \ge 0.50$ AND $N_{\text{valid}} \ge 5$ enter the primary event-recovery denominator ($N_{\text{adequate, interior}}$) and numerator ($N_{\text{recovered, interior}}$). Sector-boundary truncated events are strictly excluded from the primary metric to prevent asymmetric partial dips from distorting detection baselines.
+   - *Segregated Secondary Diagnostic Track*: Boundary-truncated events ($W_{\text{event}, k} \not\subset [t_{\text{base},\min}, t_{\text{base},\max}]$) meeting $f_{\text{temporal}} \ge 0.30$ AND $N_{\text{valid}} \ge 3$ are retained and reported separately as a secondary diagnostic:
+     $$\text{Recovery}_{\text{boundary, diag}} = \frac{N_{\text{boundary\_recovered}}}{N_{\text{boundary\_adequate}}}$$
+     These are explicitly labeled as exploratory diagnostics to assess edge-detection sensitivity without compromising the integrity of primary benchmark scores.
+   - *Implementation Caveat*: The continuous exposure overlap measure $\mu(I_i \cap W_{\text{event}, k})$ is the formal standard; the discrete cadence approximation in `tess_loader.py` is documented as a temporary software limitation to be replaced by full Lebesgue interval integration in future code updates.
+4. **Denominator Isolation Under Approved Policy**:
+   Under approved Option 2:
+   - "Sector-Boundary Truncated" events are excluded from the primary event-recovery denominator. Qualifying boundary events ($f_{\text{temporal}} \ge 0.30, N_{\text{valid}} \ge 3$) form the separate denominator $N_{\text{boundary\_adequate}}$ for secondary diagnostic reporting.
+   - "Not Observed / Zero Cadence" (downlink gap) events are excluded from both primary and secondary denominators.
+   - "Insufficient Coverage" events ($N_{\text{valid}} < 5$ or $f_{\text{temporal}} < 50\%$ for interior events; $N_{\text{valid}} < 3$ or $f_{\text{temporal}} < 30\%$ for boundary events) are excluded from the respective recovery denominators.
+   - The primary event-recovery denominator consists strictly of **Adequately Covered Interior Events** ($N_{\text{adequate, interior}}$).
 
 ### 7.3 Disambiguation of the 6-Hour Gap Rule
 1. **Primary Adequacy Criterion**: Actual in-transit valid temporal coverage ($N_{\text{valid}} \ge 5$ and $f_{\text{temporal}} \ge 50\%$) is the primary determinant of event eligibility.
@@ -641,7 +645,7 @@ To prevent cherry-picking or silent cohort modifications, every benchmark run mu
 |   - Excluded for Low Usable Cadence Duty Cycle (< 80%)                        : - N_cadence_fail         |
 |   - Excluded for Ephemeris Uncertainty Propagation Failure (> 0.25 Tdur)      : - N_ephem_fail           |
 |   - Excluded for Period Search Grid Incompatibility (P > 15 days)             : - N_grid_incompat        |
-|   - Excluded for Multi-Planet Architecture (if Gate 06 = exclude)             : - N_multiplanet          |
+|   - Excluded from Primary Cohort for Multi-Planet Architecture (GATE-06 Option C) : - N_multiplanet          |
 | FINAL ELIGIBLE AND SEARCHED TARGET COHORT                                     : N_searched               |
 |   ├── Evaluated Confirmed Hosts                                               : N_hosts_eval             |
 |   └── Evaluated Comparison Stars                                              : N_comp_eval              |
@@ -682,16 +686,16 @@ The following items are formal decision gates requiring explicit researcher sign
 
 | Gate ID | Topic | Proposed Option | Alternative Options | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **GATE-01** | Period Matching Tolerance | [PROPOSED] Relative tolerance $\epsilon_P = 1.0\%$ ($0.01$) | Fourier limit: $3 \times P^2 / T_{\text{usable}}$ | **AWAITING APPROVAL** |
-| **GATE-02** | CNN Dual Validation Gate | [PROPOSED] Specificity $\ge 0.85$ AND Sensitivity $\ge 0.75$ | Specificity $\ge 0.90$ AND Sensitivity $\ge 0.80$ | **AWAITING APPROVAL** |
-| **GATE-03** | Window Adequacy & Boundary Policy | [PROPOSED] $N_{\text{valid}} \ge 5$ AND $f_{\text{temporal}} \ge 50\%$; categorical exclusion of boundary partials | $N_{\text{valid}} \ge 3, f_{\text{temporal}} \ge 30\%$; partial recovery evaluation; secondary diagnostic track | **AWAITING APPROVAL** |
-| **GATE-04** | Harmonic Set Definition | [PROPOSED] $\mathcal{H} = \{1/3, 1/2, 2, 3\}$ | Restrict strictly to $\mathcal{H} = \{1/2, 2\}$ | **AWAITING APPROVAL** |
-| **GATE-05** | Detrending Filter & Threshold | [PROPOSED] Running median ($W=1.25\text{ d}$, Box fit, $R_{\text{depth}} \ge 0.95, f_{\text{fail}} \le 0.02$) | Robust biweight spline ($W=1.25\text{ d}$, Trapezoid fit) | **AWAITING APPROVAL** |
-| **GATE-06** | Multi-Planet Handling | [PROPOSED] Restrict primary cohort to single confirmed hosts | Score against highest-depth planet in system | **AWAITING APPROVAL** |
-| **GATE-07** | Search Range Boundaries | [PROPOSED] Restrict cohort to $P \in [0.5, 15.0]\text{ days}$ | Expand BLS grid to $P_{\max} = 25.0\text{ days}$ | **AWAITING APPROVAL** |
-| **GATE-08** | Production Cohort Size | [PROPOSED] 50 Confirmed Hosts, 50 Comparison Stars ($N=100$) | 30 Hosts, 30 Comparison Stars ($N=60$) | **AWAITING APPROVAL** |
-| **GATE-09** | BLS Frequency Grid Spacing | [PROPOSED] Astropy `autoperiod` duration-adaptive scaling | Fixed uniform frequency grid ($\Delta f \approx 0.00730\text{ d}^{-1}$) | **AWAITING APPROVAL** |
-| **GATE-10** | BLS Flux Weighting Model | [PROPOSED] Inverse-variance weighting ($w_i = 1 / \sigma_i^2$) | Uniform weighting ($w_i = 1$) | **AWAITING APPROVAL** |
-| **GATE-11** | SDE Background Estimation | [PROPOSED] Option A: All frequencies unclipped | Option B: Peak-excluded robust MAD; Option C: Full alias union $\mathcal{E}$; Option D: $3\sigma$ iterative | **AWAITING APPROVAL** |
-| **GATE-12** | Epoch Matching Tolerance | [PROPOSED] Option A: $\Delta t_{0,\text{tol}} = 0.50 \times T_{\text{dur}}$ (scoring convention) | Option B: $0.25 T_{\text{dur}}$; Option C: Bounded composite (calibrated resolution + ephemeris drift) | **AWAITING APPROVAL** |
+| **GATE-01** | Period Matching Tolerance | Relative tolerance $\epsilon_P = 1.0\%$ ($0.01$) [Option A] | Fourier limit: $3 \times P^2 / T_{\text{usable}}$ | **APPROVED** |
+| **GATE-02** | CNN Dual Validation Gate | Defer formal qualification; retain conditional probation (`enabled: false`) [Option C] | Specificity $\ge 0.85$ / Sensitivity $\ge 0.75$ [Option A]; 0.90 / 0.80 [Option B] | **APPROVED** |
+| **GATE-03** | Window Adequacy & Boundary Policy | Target $\Delta T \ge 20\text{ d}$, usable $\ge 80\%$; Primary event $N_{\text{valid}} \ge 5$ AND $f_{\text{temporal}} \ge 50\%$ (interior only); Segregated secondary boundary track ($N_{\text{valid}} \ge 3, f_{\text{temporal}} \ge 30\%$) [Option 2] | Option 1: Categorical exclusion; Option 3: Permissive pooling; Option 4: Duration-scaled | **APPROVED** |
+| **GATE-04** | Harmonic Set Definition | Narrow harmonic set: $\mathcal{H} = \{1/2, 2\}$ [Option B] | Broad resonance set: $\mathcal{H} = \{1/3, 1/2, 2, 3\}$ [Option A] | **APPROVED** |
+| **GATE-05** | Detrending Filter & Threshold | Primary: Native SPOC PDCSAP (scalar median normalization only); Secondary: Segment-wise running median ($W=1.25\text{ d}$) diagnostic track; Spline deferred; 1% vs 2% $f_{\text{fail}}$ discrepancy unresolved [Option 4] | Option 1: Native only; Option 2: Running median only; Option 3: Spline (deferred) | **APPROVED** |
+| **GATE-06** | Multi-Planet Handling | Iterative multi-signal recovery [Option C]; primary single-planet cohort; sector expansion fallback; segregated multi-planet reporting | Option A: Strict single-planet only; Option B: Dominant-planet scoring | **APPROVED** |
+| **GATE-07** | Search Range Boundaries | [APPROVED] Restrict cohort to $P \in [0.5, 15.0]\text{ days}$ (clamped to $0.95 \times T_{\text{usable}}$); single-transit events to future track; LHS 3844 b pilot detection ($P \approx 0.925\text{ d}$) documented as $2\times$ harmonic recovery under GATE-04 | Expand BLS grid to $P_{\max} = 25.0\text{ days}$ | **APPROVED** |
+| **GATE-08** | Production Cohort Size | [APPROVED] Target $N = 100$ (50 Confirmed Hosts, 50 Observational Comparison Stars; Sectors 1–5; Stage 1 runs on $N=10$ pilot first; comparison stars are non-detection controls) | 30 Hosts, 30 Comparison Stars ($N=60$) | **APPROVED** |
+| **GATE-09** | BLS Frequency Grid Spacing | Astropy `autoperiod` adaptive scaling ($f_{\text{factor}}=5.0$) [Option A, Primary] | Fixed uniform frequency grid ($N_{\text{freq}} \ge 25,000, \Delta f \le 0.00008\text{ d}^{-1}$) [Option B, Comparison; corrected from erroneous $\Delta f \approx 0.00730\text{ d}^{-1}$] | **APPROVED** |
+| **GATE-10** | BLS Flux Weighting Model | [APPROVED] Inverse-variance weighting ($w_i = 1 / \sigma_i^2$, passed via dy to Astropy BLS; uniform weighting retained as secondary sensitivity) | Uniform weighting ($w_i = 1$) | **APPROVED** |
+| **GATE-11** | SDE Background Estimation | [APPROVED] Option A (all-finite parametric mean/std) for Stage 1 baseline; Option C (alias union mask $\mathcal{E}$ + robust MAD) intended Stage 2 candidate conditional on Experiment 2; standardized to $3\Delta f$ peak-exclusion half-width | Option B: Peak-excluded; Option D: Iterative outlier clipping | **APPROVED** |
+| **GATE-12** | Epoch Matching Tolerance | [APPROVED] Option C: Bounded composite convention $\Delta t_{0,\text{tol}} = \min(0.50 T_{\text{dur}}, \sqrt{(0.25 T_{\text{dur}})^2 + (3\sigma_{t_{\text{mid}}})^2})$ ($0.25 T_{\text{dur}}$ core convention, $0.50 T_{\text{dur}}$ scoring cap; protocol conventions, not empirically calibrated; scoring pending) | Option A: $0.50 \times T_{\text{dur}}$; Option B: $0.25 \times T_{\text{dur}}$ | **APPROVED** |
 
