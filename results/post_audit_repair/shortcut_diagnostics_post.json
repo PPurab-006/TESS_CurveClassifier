@@ -1,0 +1,102 @@
+{
+  "dataset_sample_size": 40,
+  "n_positive": 20,
+  "n_negative": 20,
+  "nuisance_features_evaluated": [
+    "n_raw",
+    "n_valid",
+    "missing_fraction",
+    "raw_mean",
+    "raw_median",
+    "est_noise",
+    "noise_sigma_meta",
+    "duration_days"
+  ],
+  "feature_distribution_comparisons": {
+    "n_raw": {
+      "pos_mean": 19728.0,
+      "pos_std": 0.0,
+      "neg_mean": 19728.0,
+      "neg_std": 0.0,
+      "ks_statistic": 0.0,
+      "ks_pvalue": 1.0,
+      "significant_difference": false
+    },
+    "n_valid": {
+      "pos_mean": 18676.65,
+      "pos_std": 12.519085429854691,
+      "neg_mean": 18675.3,
+      "neg_std": 13.446560898608983,
+      "ks_statistic": 0.15,
+      "ks_pvalue": 0.9831368772656193,
+      "significant_difference": false
+    },
+    "missing_fraction": {
+      "pos_mean": 0.05329227493917275,
+      "pos_std": 0.0006345846223567773,
+      "neg_mean": 0.053360705596107075,
+      "neg_std": 0.000681597774665895,
+      "ks_statistic": 0.15,
+      "ks_pvalue": 0.9831368772656193,
+      "significant_difference": false
+    },
+    "raw_mean": {
+      "pos_mean": 0.9995719966734334,
+      "pos_std": 0.0007292565084483911,
+      "neg_mean": 0.9997600761159461,
+      "neg_std": 0.001077206945363178,
+      "ks_statistic": 0.25,
+      "ks_pvalue": 0.571336004933722,
+      "significant_difference": false
+    },
+    "raw_median": {
+      "pos_mean": 0.9998323075102817,
+      "pos_std": 0.0007609355764794523,
+      "neg_mean": 0.9999664398519663,
+      "neg_std": 0.0010510463921228465,
+      "ks_statistic": 0.2,
+      "ks_pvalue": 0.8319696107963263,
+      "significant_difference": false
+    },
+    "est_noise": {
+      "pos_mean": 0.001892503143211504,
+      "pos_std": 0.000523667743959212,
+      "neg_mean": 0.001900900069864004,
+      "neg_std": 0.0004827024602584165,
+      "ks_statistic": 0.2,
+      "ks_pvalue": 0.8319696107963263,
+      "significant_difference": false
+    },
+    "noise_sigma_meta": {
+      "pos_mean": 0.0012237313010111201,
+      "pos_std": 0.00020673578825150255,
+      "neg_mean": 0.0011032802081402222,
+      "neg_std": 0.00017406656233466482,
+      "ks_statistic": 0.35,
+      "ks_pvalue": 0.17453300569806826,
+      "significant_difference": false
+    },
+    "duration_days": {
+      "pos_mean": 27.399999999999995,
+      "pos_std": 3.552713678800501e-15,
+      "neg_mean": 27.399999999999995,
+      "neg_std": 3.552713678800501e-15,
+      "ks_statistic": 0.0,
+      "ks_pvalue": 1.0,
+      "significant_difference": false
+    }
+  },
+  "nuisance_only_classification": {
+    "logistic_regression": {
+      "cv_roc_auc": 0.515,
+      "cv_accuracy": 0.475,
+      "shortcut_detected": false
+    },
+    "random_forest": {
+      "cv_roc_auc": 0.32499999999999996,
+      "cv_accuracy": 0.325,
+      "shortcut_detected": false
+    }
+  },
+  "conclusion": "Nuisance shortcut risk is LOW. Models cannot predict transit presence from length, missingness, or noise alone."
+}

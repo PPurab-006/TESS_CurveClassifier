@@ -28,12 +28,13 @@ def main():
     parser = argparse.ArgumentParser(description="Generate synthetic benchmark light curves.")
     parser.add_argument("--config", type=str, default="configs/synthetic_benchmark.yaml", help="Path to config YAML")
     parser.add_argument("--n-stars", type=int, default=None, help="Override number of stars")
+    parser.add_argument("--seed", type=int, default=None, help="Override random seed")
     parser.add_argument("--output-dir", type=str, default="data/processed", help="Output directory")
     args = parser.parse_args()
 
     logger = get_logger("synthetic_generator")
     config = load_config(args.config)
-    seed = config["dataset"].get("seed", 42)
+    seed = args.seed if args.seed is not None else config["dataset"].get("seed", 42)
     set_seed(seed)
 
     n_stars = args.n_stars or config["dataset"].get("n_stars", 80)
@@ -41,7 +42,7 @@ def main():
     n_transit = int(round(n_stars * transit_frac))
     n_control = n_stars - n_transit
 
-    logger.info(f"Generating synthetic benchmark suite: {n_stars} stars ({n_transit} transits, {n_control} controls)")
+    logger.info(f"Generating synthetic benchmark suite: {n_stars} stars ({n_transit} transits, {n_control} controls, seed={seed})")
 
     rng = np.random.default_rng(seed)
     t_params = config.get("transit_parameters", {})
@@ -59,6 +60,7 @@ def main():
         depth = rng.uniform(t_params.get("depth_min", 0.002), t_params.get("depth_max", 0.012))
         duration = rng.uniform(t_params.get("duration_hours_min", 1.5), t_params.get("duration_hours_max", 4.0))
         t0 = rng.uniform(0.2, period * 0.8)
+        baseline = rng.uniform(s_params.get("baseline_flux_min", 0.95), s_params.get("baseline_flux_max", 1.05))
         noise = rng.uniform(s_params.get("noise_sigma_min", 0.0008), s_params.get("noise_sigma_max", 0.0015))
         var_amp = rng.uniform(0.0005, s_params.get("variability_amplitude_max", 0.003))
         var_period = rng.uniform(s_params.get("variability_period_min_days", 4.0), s_params.get("variability_period_max_days", 14.0))
@@ -66,6 +68,7 @@ def main():
         cfg = SyntheticTransitConfig(
             duration_days=config["dataset"].get("duration_days", 27.4),
             cadence_minutes=config["dataset"].get("cadence_minutes", 2.0),
+            baseline_flux=float(baseline),
             has_transit=True,
             period_days=float(period),
             t0_days=float(t0),
@@ -81,6 +84,9 @@ def main():
             sector_gap_start=sys_params.get("sector_gap_start", 13.1),
             sector_gap_duration=sys_params.get("sector_gap_duration", 1.2),
             dropout_fraction=sys_params.get("dropout_fraction", 0.01),
+            normalize_flux=config["dataset"].get("normalize_flux", True),
+            normalization_method=config["dataset"].get("normalization_method", "robust_continuum"),
+            calibration_uncertainty=float(s_params.get("calibration_uncertainty", 0.001)),
             seed=int(rng.integers(1, 1000000))
         )
         lc = generate_synthetic_light_curve(cfg, target_id=star_id)
@@ -88,9 +94,10 @@ def main():
         star_ids.append(star_id)
         labels.append(1)
 
-    # 2. Generate control stars
+    # 2. Generate control stars (using identical matched nuisance distributions)
     for i in range(n_control):
         star_id = f"SYNTH-CTRL-{i+1:04d}"
+        baseline = rng.uniform(s_params.get("baseline_flux_min", 0.95), s_params.get("baseline_flux_max", 1.05))
         noise = rng.uniform(s_params.get("noise_sigma_min", 0.0008), s_params.get("noise_sigma_max", 0.0015))
         var_amp = rng.uniform(0.0005, s_params.get("variability_amplitude_max", 0.003))
         var_period = rng.uniform(s_params.get("variability_period_min_days", 4.0), s_params.get("variability_period_max_days", 14.0))
@@ -98,6 +105,7 @@ def main():
         cfg = SyntheticTransitConfig(
             duration_days=config["dataset"].get("duration_days", 27.4),
             cadence_minutes=config["dataset"].get("cadence_minutes", 2.0),
+            baseline_flux=float(baseline),
             has_transit=False,
             noise_sigma=float(noise),
             variability_amplitude=float(var_amp),
@@ -108,6 +116,9 @@ def main():
             sector_gap_start=sys_params.get("sector_gap_start", 13.1),
             sector_gap_duration=sys_params.get("sector_gap_duration", 1.2),
             dropout_fraction=sys_params.get("dropout_fraction", 0.01),
+            normalize_flux=config["dataset"].get("normalize_flux", True),
+            normalization_method=config["dataset"].get("normalization_method", "robust_continuum"),
+            calibration_uncertainty=float(s_params.get("calibration_uncertainty", 0.001)),
             seed=int(rng.integers(1, 1000000))
         )
         lc = generate_synthetic_light_curve(cfg, target_id=star_id)

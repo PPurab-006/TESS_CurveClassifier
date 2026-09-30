@@ -48,13 +48,14 @@ data/processed/*
 *.parquet
 *.tar.gz
 
+# Local environment and secrets
+.env
+.env.*
+*.env
+
 # Results & Artifacts
 results/logs/*
 !results/logs/.gitkeep
-results/figures/*
-!results/figures/.gitkeep
-results/metrics/*
-!results/metrics/.gitkeep
 *.pt
 *.pth
 *.joblib

@@ -58,6 +58,8 @@ class LightCurveData:
     has_transit: bool
     metadata: Dict[str, Any] = field(default_factory=dict)
     quality_mask: Optional[np.ndarray] = None
+    raw_flux: Optional[np.ndarray] = None
+    raw_flux_err: Optional[np.ndarray] = None
 
     def __post_init__(self):
         if not (len(self.time) == len(self.flux) == len(self.flux_err)):
@@ -67,6 +69,10 @@ class LightCurveData:
             )
         if self.quality_mask is not None and len(self.quality_mask) != len(self.time):
             raise ValueError("quality_mask length must match time array length.")
+        if self.raw_flux is not None and len(self.raw_flux) != len(self.time):
+            raise ValueError("raw_flux length must match time array length.")
+        if self.raw_flux_err is not None and len(self.raw_flux_err) != len(self.time):
+            raise ValueError("raw_flux_err length must match time array length.")
 
     @property
     def valid_indices(self) -> np.ndarray:
@@ -87,5 +93,8 @@ class LightCurveData:
             category=self.category,
             has_transit=self.has_transit,
             metadata=dict(self.metadata),
-            quality_mask=np.ones(np.sum(mask), dtype=bool)
+            quality_mask=np.ones(np.sum(mask), dtype=bool),
+            raw_flux=self.raw_flux[mask].copy() if self.raw_flux is not None else None,
+            raw_flux_err=self.raw_flux_err[mask].copy() if self.raw_flux_err is not None else None,
         )
+

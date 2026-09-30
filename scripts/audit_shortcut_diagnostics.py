@@ -159,4 +159,9 @@ def run_shortcut_diagnostics(
 
 
 if __name__ == "__main__":
-    run_shortcut_diagnostics()
+    import argparse
+    parser = argparse.ArgumentParser(description="Diagnostic suite for synthetic data shortcuts.")
+    parser.add_argument("--data-path", type=str, default="data/processed/synthetic_light_curves.pkl", help="Path to light curve pickle file")
+    parser.add_argument("--output-json", type=str, default="results/audit/shortcut_diagnostics.json", help="Path to output JSON")
+    args = parser.parse_args()
+    run_shortcut_diagnostics(data_path=args.data_path, output_json=args.output_json)

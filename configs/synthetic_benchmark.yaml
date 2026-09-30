@@ -7,6 +7,8 @@ dataset:
   transit_fraction: 0.5
   duration_days: 27.4
   cadence_minutes: 2.0
+  normalize_flux: true
+  normalization_method: "robust_continuum"
 
 transit_parameters:
   period_min_days: 1.2
@@ -19,6 +21,9 @@ transit_parameters:
 
 stellar_parameters:
   baseline_flux: 1.0
+  baseline_flux_min: 0.95
+  baseline_flux_max: 1.05
+  calibration_uncertainty: 0.001
   noise_sigma_min: 0.0008
   noise_sigma_max: 0.0015
   variability_amplitude_max: 0.003

@@ -48,7 +48,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -q --cov=tess_benchmark --cov-report=term-missing"
+addopts = "-ra -q -p no:launch_testing --cov=tess_benchmark --cov-report=term-missing"
 testpaths = [
     "tests"
 ]

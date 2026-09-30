@@ -1,0 +1,11 @@
+target_name,tic_id,category,is_confirmed_host,planet_name,toi_id,orbital_period_days,period_uncertainty,t0_reference_bjd,duration_hours,depth_ppm,ephemeris_source,notes
+WASP-126,25155310,confirmed_planet_host,True,WASP-126 b,TOI-114.01,3.2887898,3e-07,2458327.519958,3.436772,7005.72,"NASA Exoplanet Archive (TOI Table, Sector 1 SPOC fit)",Known transiting hot Jupiter; deep ~0.7% transit.
+WASP-46,231663901,confirmed_planet_host,True,WASP-46 b,TOI-101.01,1.4303699,8e-07,2458326.009117,1.616599,18960.71,"NASA Exoplanet Archive (TOI Table, Sector 1 SPOC fit)",Known transiting hot Jupiter; very deep ~1.9% transit.
+WASP-91,238176110,confirmed_planet_host,True,WASP-91 b,TOI-116.01,2.7985802,3e-07,2458326.688916,2.380104,16708.72,"NASA Exoplanet Archive (TOI Table, Sector 1 SPOC fit)",Known transiting gas giant; deep ~1.7% transit.
+LHS 3844,410153553,confirmed_planet_host,True,LHS 3844 b,TOI-136.01,0.4629304,2.2e-06,2458325.724125,0.540943,4507.33,"NASA Exoplanet Archive (TOI Table, Sector 1 SPOC fit)",Ultra-short period terrestrial exoplanet around M dwarf; shallow transit.
+WASP-124,97409519,confirmed_planet_host,True,WASP-124 b,TOI-113.01,3.372877,0.000147,2458327.053085,2.63426,17163.6,"NASA Exoplanet Archive (TOI Table, Sector 1 SPOC fit)",Known transiting gas giant; deep ~1.7% transit.
+TIC 265591866,265591866,control_star,False,None,None,,,,,,N/A (Observational Control),Field star in Sector 1; observational non-detection control (not claimed planet-free).
+TIC 306573321,306573321,control_star,False,None,None,,,,,,N/A (Observational Control),Field star in Sector 1; observational non-detection control (not claimed planet-free).
+TIC 277891181,277891181,control_star,False,None,None,,,,,,N/A (Observational Control),Field star in Sector 1; observational non-detection control (not claimed planet-free).
+TIC 370041901,370041901,control_star,False,None,None,,,,,,N/A (Observational Control),Field star in Sector 1; observational non-detection control (not claimed planet-free).
+TIC 197712257,197712257,control_star,False,None,None,,,,,,N/A (Observational Control),Field star in Sector 1; observational non-detection control (not claimed planet-free).

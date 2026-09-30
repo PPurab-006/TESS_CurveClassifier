@@ -78,7 +78,92 @@ class SyntheticTransitConfig:
     sector_gap_start: float = 13.2
     sector_gap_duration: float = 1.2
     dropout_fraction: float = 0.02
+    normalize_flux: bool = True
+    normalization_method: str = "robust_continuum"
+    calibration_uncertainty: float = 0.001
     seed: Optional[int] = None
+
+
+def normalize_light_curve(
+    flux: np.ndarray,
+    quality_mask: Optional[np.ndarray] = None,
+    method: str = "robust_continuum",
+    calibration_uncertainty: float = 0.0,
+    rng: Optional[np.random.Generator] = None,
+) -> Tuple[np.ndarray, float]:
+    """
+    Apply unsupervised continuum normalization to a photometric flux series.
+
+    Removes arbitrary stellar baseline flux offsets across both transit host and
+    control stars without using transit labels or known transit timestamps.
+
+    Methods
+    -------
+    'robust_continuum' :
+        Computes the out-of-gap median continuum and applies realistic zero-point
+        photometric calibration dispersion (default 1000 ppm / 0.1%), simulating
+        the calibration uncertainty inherent in space-telescope aperture photometry.
+        This prevents classifiers from exploiting the tiny integrated flux attenuation
+        of transit dips as a class shortcut while preserving transit morphology.
+    'median' :
+        Divides flux by the median of valid cadences.
+    'mean' :
+        Divides flux by the sample mean of valid cadences.
+    'none' :
+        Identity pass-through (no normalization applied).
+
+    Parameters
+    ----------
+    flux : np.ndarray
+        Raw photometric flux values.
+    quality_mask : Optional[np.ndarray]
+        Boolean mask where True indicates unflagged, valid cadences.
+    method : str
+        Normalization strategy ('robust_continuum', 'median', 'mean', 'none').
+    calibration_uncertainty : float
+        Standard deviation of residual photometric zero-point calibration error.
+    rng : Optional[np.random.Generator]
+        Reproducible random number generator for calibration uncertainty sampling.
+
+    Returns
+    -------
+    Tuple[np.ndarray, float]
+        Normalized flux array and the computed continuum factor.
+
+    Limitations
+    -----------
+    In genuine space mission data (e.g. TESS/Kepler), instrumental systematics such as
+    pointing jitter, thermal dissipation after momentum dumps, and scattered Earthshine
+    cause time-dependent baseline trends. Scalar continuum normalization is sufficient
+    for stationary synthetic benchmarks but cannot replace cotrending basis vectors (CBVs)
+    or spline/Gaussian-process detrending required on real spacecraft photometry.
+    """
+    if method == "none":
+        return flux.copy(), 1.0
+
+    mask = quality_mask if quality_mask is not None else np.ones(len(flux), dtype=bool)
+    valid_flux = flux[mask]
+    if len(valid_flux) == 0:
+        valid_flux = flux
+
+    if method == "mean":
+        continuum = float(np.mean(valid_flux))
+    elif method == "median":
+        continuum = float(np.median(valid_flux))
+    elif method == "robust_continuum":
+        med = float(np.median(valid_flux))
+        if calibration_uncertainty > 0 and rng is not None:
+            cal_err = float(rng.normal(0.0, calibration_uncertainty))
+            continuum = med * (1.0 + cal_err)
+        else:
+            continuum = med
+    else:
+        raise ValueError(f"Unknown normalization method: {method}")
+
+    if continuum <= 0 or not np.isfinite(continuum):
+        continuum = 1.0
+
+    return flux / continuum, continuum
 
 
 def trapezoidal_transit(
@@ -218,6 +303,18 @@ def generate_synthetic_light_curve(
         dropout_mask = rng.random(n_points) < config.dropout_fraction
         quality_mask[dropout_mask] = False
 
+    # 7. Unsupervised baseline continuum normalization
+    continuum_factor = 1.0
+    if config.normalize_flux and config.normalization_method != "none":
+        flux, continuum_factor = normalize_light_curve(
+            flux=flux,
+            quality_mask=quality_mask,
+            method=config.normalization_method,
+            calibration_uncertainty=config.calibration_uncertainty,
+            rng=rng,
+        )
+        flux_err = flux_err / continuum_factor
+
     metadata: Dict[str, Any] = {
         "duration_days": config.duration_days,
         "cadence_minutes": config.cadence_minutes,
@@ -231,7 +328,10 @@ def generate_synthetic_light_curve(
             if config.has_transit and config.noise_sigma > 0 else 0.0
         ),
         "synthetic": True,
-        "seed": config.seed
+        "seed": config.seed,
+        "baseline_flux_raw": config.baseline_flux,
+        "continuum_factor": continuum_factor,
+        "normalization_method": config.normalization_method if config.normalize_flux else "none",
     }
 
     category = (

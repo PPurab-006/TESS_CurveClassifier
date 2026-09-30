@@ -28,11 +28,15 @@ def main():
     parser.add_argument("--features-csv", type=str, default="data/processed/features_tabular.csv")
     parser.add_argument("--phase-vectors-npy", type=str, default="data/processed/phase_vectors.npy")
     parser.add_argument("--config", type=str, default="configs/default.yaml")
+    parser.add_argument("--output-csv", type=str, default="results/metrics/model_comparison.csv")
+    parser.add_argument("--output-json", type=str, default="results/metrics/model_comparison.json")
+    parser.add_argument("--plot-path", type=str, default="results/figures/model_comparison.png")
+    parser.add_argument("--seed", type=int, default=None, help="Override seed")
     args = parser.parse_args()
 
     logger = get_logger("model_evaluation")
     cfg = load_config(args.config)
-    seed = cfg.get("project", {}).get("seed", 42)
+    seed = args.seed if args.seed is not None else cfg.get("project", {}).get("seed", 42)
     set_seed(seed)
 
     feat_path = Path(args.features_csv)
@@ -115,22 +119,22 @@ def main():
     logger.info(f"CNN1D -> F1: {report_cnn.f1:.3f}, Recall: {report_cnn.recall:.3f}, Precision: {report_cnn.precision:.3f}, PR-AUC: {report_cnn.pr_auc:.3f}")
 
     # 4. Save metrics tables
-    metrics_dir = Path("results/metrics")
-    metrics_dir.mkdir(parents=True, exist_ok=True)
+    csv_out = Path(args.output_csv)
+    csv_out.parent.mkdir(parents=True, exist_ok=True)
     summary_records = [r.to_dict() for r in results_reports]
 
     res_df = pd.DataFrame(summary_records)
-    csv_out = metrics_dir / "model_comparison.csv"
     res_df.to_csv(csv_out, index=False)
-    json_out = metrics_dir / "model_comparison.json"
+    json_out = Path(args.output_json)
+    json_out.parent.mkdir(parents=True, exist_ok=True)
     with open(json_out, "w") as f:
         json.dump(summary_records, f, indent=2)
 
     logger.info(f"Saved model comparison table to {csv_out}")
 
     # 5. Generate comparative visualization
-    fig_dir = Path("results/figures")
-    fig_dir.mkdir(parents=True, exist_ok=True)
+    fig_out = Path(args.plot_path)
+    fig_out.parent.mkdir(parents=True, exist_ok=True)
 
     models = [r.model_name for r in results_reports]
     f1_scores = [r.f1 for r in results_reports]
@@ -153,7 +157,6 @@ def main():
     plt.grid(axis="y", linestyle="--", alpha=0.5)
     plt.tight_layout()
 
-    fig_out = fig_dir / "model_comparison.png"
     plt.savefig(fig_out, dpi=200)
     plt.close()
     logger.info(f"Saved comparison figure to {fig_out}")

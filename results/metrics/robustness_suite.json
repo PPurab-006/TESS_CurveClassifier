@@ -1,0 +1,326 @@
+[
+  {
+    "axis": "noise_added",
+    "level": 0.0,
+    "model": "BLS",
+    "f1": 0.7142857142857143,
+    "recall": 1.0,
+    "precision": 0.5555555555555556,
+    "fpr": 0.5714285714285714
+  },
+  {
+    "axis": "noise_added",
+    "level": 0.0,
+    "model": "RandomForest",
+    "f1": 1.0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "noise_added",
+    "level": 0.0,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  },
+  {
+    "axis": "noise_added",
+    "level": 0.001,
+    "model": "BLS",
+    "f1": 0.6666666666666666,
+    "recall": 1.0,
+    "precision": 0.5,
+    "fpr": 0.7142857142857143
+  },
+  {
+    "axis": "noise_added",
+    "level": 0.001,
+    "model": "RandomForest",
+    "f1": 1.0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "noise_added",
+    "level": 0.001,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  },
+  {
+    "axis": "noise_added",
+    "level": 0.002,
+    "model": "BLS",
+    "f1": 0.6666666666666666,
+    "recall": 1.0,
+    "precision": 0.5,
+    "fpr": 0.7142857142857143
+  },
+  {
+    "axis": "noise_added",
+    "level": 0.002,
+    "model": "RandomForest",
+    "f1": 1.0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "noise_added",
+    "level": 0.002,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  },
+  {
+    "axis": "noise_added",
+    "level": 0.004,
+    "model": "BLS",
+    "f1": 0.7692307692307693,
+    "recall": 1.0,
+    "precision": 0.625,
+    "fpr": 0.42857142857142855
+  },
+  {
+    "axis": "noise_added",
+    "level": 0.004,
+    "model": "RandomForest",
+    "f1": 0.8888888888888888,
+    "recall": 0.8,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "noise_added",
+    "level": 0.004,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  },
+  {
+    "axis": "depth_scale",
+    "level": 1.0,
+    "model": "BLS",
+    "f1": 0.7142857142857143,
+    "recall": 1.0,
+    "precision": 0.5555555555555556,
+    "fpr": 0.5714285714285714
+  },
+  {
+    "axis": "depth_scale",
+    "level": 1.0,
+    "model": "RandomForest",
+    "f1": 1.0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "depth_scale",
+    "level": 1.0,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  },
+  {
+    "axis": "depth_scale",
+    "level": 0.75,
+    "model": "BLS",
+    "f1": 0.7142857142857143,
+    "recall": 1.0,
+    "precision": 0.5555555555555556,
+    "fpr": 0.5714285714285714
+  },
+  {
+    "axis": "depth_scale",
+    "level": 0.75,
+    "model": "RandomForest",
+    "f1": 1.0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "depth_scale",
+    "level": 0.75,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  },
+  {
+    "axis": "depth_scale",
+    "level": 0.5,
+    "model": "BLS",
+    "f1": 0.7142857142857143,
+    "recall": 1.0,
+    "precision": 0.5555555555555556,
+    "fpr": 0.5714285714285714
+  },
+  {
+    "axis": "depth_scale",
+    "level": 0.5,
+    "model": "RandomForest",
+    "f1": 1.0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "depth_scale",
+    "level": 0.5,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  },
+  {
+    "axis": "depth_scale",
+    "level": 0.25,
+    "model": "BLS",
+    "f1": 0.7142857142857143,
+    "recall": 1.0,
+    "precision": 0.5555555555555556,
+    "fpr": 0.5714285714285714
+  },
+  {
+    "axis": "depth_scale",
+    "level": 0.25,
+    "model": "RandomForest",
+    "f1": 0.8888888888888888,
+    "recall": 0.8,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "depth_scale",
+    "level": 0.25,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.0,
+    "model": "BLS",
+    "f1": 0.7142857142857143,
+    "recall": 1.0,
+    "precision": 0.5555555555555556,
+    "fpr": 0.5714285714285714
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.0,
+    "model": "RandomForest",
+    "f1": 1.0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.0,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.15,
+    "model": "BLS",
+    "f1": 0.7142857142857143,
+    "recall": 1.0,
+    "precision": 0.5555555555555556,
+    "fpr": 0.5714285714285714
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.15,
+    "model": "RandomForest",
+    "f1": 1.0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.15,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.3,
+    "model": "BLS",
+    "f1": 0.7142857142857143,
+    "recall": 1.0,
+    "precision": 0.5555555555555556,
+    "fpr": 0.5714285714285714
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.3,
+    "model": "RandomForest",
+    "f1": 1.0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.3,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.5,
+    "model": "BLS",
+    "f1": 0.8333333333333334,
+    "recall": 1.0,
+    "precision": 0.7142857142857143,
+    "fpr": 0.2857142857142857
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.5,
+    "model": "RandomForest",
+    "f1": 1.0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "fpr": 0.0
+  },
+  {
+    "axis": "dropout_fraction",
+    "level": 0.5,
+    "model": "CNN1D",
+    "f1": 0.5882352941176471,
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "fpr": 1.0
+  }
+]

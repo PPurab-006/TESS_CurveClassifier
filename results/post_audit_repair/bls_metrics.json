@@ -1,0 +1,19 @@
+{
+  "model_name": "BoxLeastSquares",
+  "precision": 0.7142857142857143,
+  "recall": 1.0,
+  "f1": 0.8333333333333334,
+  "specificity": 0.6,
+  "fpr": 0.4,
+  "pr_auc": 1.0,
+  "roc_auc": 1.0,
+  "tp": 20,
+  "fp": 8,
+  "tn": 12,
+  "fn": 0,
+  "train_time_sec": 0.0,
+  "inference_latency_ms": 1003.7104732498847,
+  "period_recovery_rate": 1.0,
+  "mean_search_runtime_sec": 1.0037104732498847,
+  "total_runtime_sec": 40.14841892999539
+}

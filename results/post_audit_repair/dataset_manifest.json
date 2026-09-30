@@ -1,0 +1,86 @@
+{
+  "manifest_timestamp_iso": "2026-09-28T01:21:00Z",
+  "repair_status": "POST_AUDIT_SYNTHETIC_BENCHMARK_REPAIRED",
+  "environment": {
+    "os": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+    "python_version": "3.11.15",
+    "python_executable": "/home/purab/Purab/Projects/TESS-Light-curve/.venv/bin/python",
+    "cpu_count": 16,
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU (CUDA available)"
+  },
+  "software_versions": {
+    "astropy": "8.0.1",
+    "lightkurve": "2.5.1",
+    "torch": "2.14.0+cu130",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.17.1",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "pytest": "9.1.1"
+  },
+  "dataset_specification": {
+    "dataset_name": "post_audit_synthetic_benchmark",
+    "generator_seed": 2026,
+    "total_targets": 40,
+    "class_balance": {
+      "transit_hosts": 20,
+      "control_stars": 20
+    },
+    "duration_days": 27.4,
+    "cadence_minutes": 2.0,
+    "normalization": {
+      "strategy": "robust_continuum",
+      "calibration_uncertainty_sigma": 0.001,
+      "label_agnostic": true,
+      "positive_control_parity": true
+    },
+    "nuisance_parameter_distributions": {
+      "baseline_flux": "Uniform(0.95, 1.05) matched across classes",
+      "noise_sigma": "Uniform(0.0008, 0.0015) matched across classes",
+      "variability_amplitude": "Uniform(0.0005, 0.003) matched across classes",
+      "variability_period_days": "Uniform(4.0, 14.0) matched across classes",
+      "flare_rate": "0.0002 matched across classes",
+      "flare_amplitude_scale": "6.0 matched across classes",
+      "sector_gap_start_days": "13.1 matched across classes",
+      "sector_gap_duration_days": "1.2 matched across classes",
+      "dropout_fraction": "0.01 matched across classes"
+    },
+    "transit_parameter_ranges": {
+      "period_days": [
+        1.2,
+        8.5
+      ],
+      "depth_fraction": [
+        0.002,
+        0.012
+      ],
+      "duration_hours": [
+        1.5,
+        4.0
+      ],
+      "ingress_fraction": 0.15
+    }
+  },
+  "preprocessing_configuration": {
+    "clip_outliers": true,
+    "low_sigma": 6.0,
+    "high_sigma": 3.5,
+    "detrend": true,
+    "detrend_window_days": 0.5,
+    "feature_extraction_phase_bins": 200
+  },
+  "verified_artifacts": {
+    "data/processed/post_audit_synthetic/synthetic_light_curves.pkl": {
+      "sha256": "2e5643961f1a4e656114e0652ee217a35d1532f1444de1d84f626ebd022cb107",
+      "size_bytes": 19741986
+    },
+    "data/processed/post_audit_synthetic/features_tabular.csv": {
+      "sha256": "3359bf6775a1d967d6892b70d0908bee8918a0a037a0d646f2d0aa213ec07a88",
+      "size_bytes": 18064
+    },
+    "data/processed/post_audit_synthetic/phase_vectors.npy": {
+      "sha256": "910654bb0e89da03fda49099ca8a50e9949d491169fc241f96f598c1d1d3302a",
+      "size_bytes": 64128
+    }
+  }
+}

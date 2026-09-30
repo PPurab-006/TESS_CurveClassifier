@@ -1,0 +1,211 @@
+# Protocol Configuration: Real TESS Blind Known-Transit Recovery Benchmark
+# Reference Document: docs/real_data_benchmark_protocol.md (Version 1.3.2)
+# Decision Log: docs/benchmark_decision_log.md (Version 1.3.2)
+# Status: DRAFT CONFIGURATION SPECIFICATION (Unresolved decisions explicitly marked)
+
+protocol_metadata:
+  protocol_id: "REAL_TESS_BENCHMARK_v1.3.2"
+  version: "1.3.2"
+  creation_date: "2026-09-28"
+  description: "Configuration specification for blind exoplanet transit recovery on authentic TESS photometry (Documentation Audit v1.3.2)"
+  blind_evaluation: true
+  freeze_state: "PENDING_RESEARCHER_APPROVAL"
+
+data_quality_rules:
+  quality_flag_mask: 0                  # Retain strictly QUALITY == 0 cadences
+  require_finite_time: true
+  require_finite_flux: true
+  require_finite_flux_err: true
+  require_monotonic_time: true
+  min_sector_baseline_days: 20.0
+  min_usable_cadence_ratio: 0.80        # Minimum 80% usable cadences across sector
+  min_cadences_per_transit: 5           # [PROPOSED] Minimum 5 valid cadences inside predicted transit window (GATE-03)
+  min_temporal_coverage_fraction: 0.50  # [PROPOSED] f_temporal >= 0.50 via Lebesgue exposure measure (GATE-03)
+  prohibit_cadence_only_adequacy: true  # Minimum cadence count alone cannot qualify an event as adequate
+  cadence_count_ratio_diagnostic: true  # R_cadence = N_valid / N_expected tracked as separate sampling diagnostic
+  local_gap_inspection_duration_multiplier: 1.0 # Local interval: [t_mid - Tdur, t_mid + Tdur]
+  downlink_gap_threshold_hours: 6.0     # Telemetry gap threshold triggering gap_affected attribute
+  segment_wise_detrending: true         # Mandate independent detrending per continuous segment
+  detrending_window_days: 1.25          # [PROPOSED] 30.0 hours: minimum satisfying W >= max(3 * Tdur_max, 1.05 days)
+  min_segment_length_days: 1.25         # Segments shorter than W are median-subtracted and tagged
+  tag_edge_cadences: true               # Tag cadences within W/2 of segment edge with edge_affected
+  detrending_filter_type: "REQUIRES_RESEARCHER_APPROVAL" # GATE-05: [PROPOSED] "running_median" vs "biweight_spline"
+  mask_known_transits_in_detrending: false # Strictly prohibited at detection time (air-gap)
+
+detrending_validation:
+  synthetic_validation_required: true   # Mandatory synthetic injection test before deployment
+  measurement_procedure: "least_squares_template_fit" # Fit template at injected ephemeris
+  baseline_flux_estimator: "out_of_transit_buffer_median" # Local median in [t_mid - 1.5*Tdur, t_mid - 0.75*Tdur] U [t_mid + 0.75*Tdur, t_mid + 1.5*Tdur]
+  fitting_model_options: ["box", "trapezoid", "mandel_agol_limb_darkened"] # GATE-05
+  recovered_depth_estimator: "fitted_template_depth_delta_post"
+  acceptance_threshold: "REQUIRES_RESEARCHER_APPROVAL" # GATE-05: [PROPOSED] R_depth >= 0.95 (Tdur <= 6h), R_depth >= 0.90 (Tdur in [6,8]h)
+  failure_handling:
+    report_failure_rate_separately: true # f_fail = N_failed / N_total must be reported explicitly
+    prohibit_silent_omission: true       # Failed fits must not disappear from acceptance statistics
+    report_both_distributions: true      # Report omnibus (R_depth = 0 on fail) and convergent-only statistics
+    segregate_edge_affected_fits: true   # Transits within 1.5*Tdur of segment edges segregated
+    max_acceptable_failure_rate: 0.01    # [PROPOSED] Candidate threshold f_fail <= 1.0% (GATE-05)
+  edge_affected_treatment: "segregated_subgroup" # Cadences within W/2 of edge reported as separate subgroup
+  required_subgroups:
+    - "depth_bins_ppm"                  # [100, 300, 1000, 3000, 10000]
+    - "duration_bins_hours"             # [1.0, 2.0, 4.0, 6.0, 8.0]
+    - "period_bins_days"                # [0.5, 2.0, 5.0, 10.0, 15.0]
+    - "cadence_modes_seconds"           # [120, 1800]
+    - "downlink_gap_proximity"          # Distance to nearest >6h gap
+    - "sector_edge_position"            # Core (|t - t_edge| > W/2) vs Edge (|t - t_edge| <= W/2)
+  reporting_formats:
+    - "error_distributions"
+    - "subgroup_medians_and_iqr"
+    - "fit_failure_rates"
+
+outlier_handling:
+  running_median_window_days: 0.5       # Local running median window
+  scatter_estimator: "normalized_mad"   # sigma_MAD = 1.4826 * MAD
+  flare_clipping_threshold_sigma: 5.0   # Flag positive outliers > +5 sigma_MAD
+  preserve_negative_outliers: true      # Strictly preserve negative excursions (transit ingress/egress)
+  immutable_raw_flux: true              # Never overwrite raw flux; store boolean outlier_flag mask
+  reconciliation_artifact: "results/real_benchmark/outlier_reconciliation.csv"
+
+ephemeris_provenance:
+  source_specific_midpoint_verification_required: true # Require catalog proof that T0 is transit midpoint
+  time_standard_verification: "BTJD_BJD_TDB_minus_2457000" # Mandate explicit verification of time standard
+  covariance_handling: "error_direction_governed_by_sign_of_E_times_Cov" # Error direction is strictly sgn(E * Cov); cannot characterize as universally conservative or underestimating
+  target_eligibility_condition: "sigma_tmid_le_0.25_Tdur" # A priori eligibility filter; distinct from epoch matching
+
+cohort_specification:
+  primary_scope: "single_sector_only"   # Multi-sector stitching deferred to exploratory track
+  stage_1_feasibility:
+    target_count: 10
+    confirmed_hosts: 5
+    observational_controls: 5
+    sector: 1
+    data_dir: "data/raw/real_tess_pilot"
+    manifest: "results/real_data_pilot/observation_manifest.csv"
+    purpose: "software_feasibility_and_airgap_verification_only"
+    allow_threshold_tuning: false       # Strictly prohibited on Stage 1
+  stage_2_production:
+    target_count: "REQUIRES_RESEARCHER_APPROVAL" # GATE-08: [PROPOSED] 100 (50 hosts, 50 controls) vs 60 (30/30)
+    sectors: [1, 2, 3, 4, 5]
+    cadence_seconds: 120
+    pipeline_product: "SPOC_PDCSAP"
+    multi_planet_policy: "REQUIRES_RESEARCHER_APPROVAL" # GATE-06: [PROPOSED] "exclude" vs "score_highest_depth_planet"
+    max_period_days_cohort: "REQUIRES_RESEARCHER_APPROVAL" # GATE-07: [PROPOSED] 15.0 vs 25.0
+
+search_methods:
+  bls_primary_baseline:
+    enabled: true
+    paradigm: "unsupervised_grid_search"
+    min_period_days: 0.5
+    max_period_days: 15.0
+    grid_construction_method: "REQUIRES_RESEARCHER_APPROVAL" # GATE-09: [PROPOSED] "autoperiod_adaptive" vs "fixed_uniform"
+    astropy_dependency_constraint: "astropy>=6.0.0" # Inequality dependency constraint, NOT an exact version pin
+    runtime_reproducibility:
+      record_installed_version: true     # Record astropy.__version__ at execution
+      export_environment_lockfile: true  # Export exact environment lockfile
+      serialize_frequency_grid: true     # Serialize generated frequency grid array to persistent disk
+      log_api_arguments: true            # Log exact dictionary of arguments passed to autoperiod()
+    exact_autoperiod_call: "BoxLeastSquares.autoperiod(duration, minimum_period=0.5, maximum_period=15.0, frequency_factor=5.0, minimum_n_transit=2)"
+    trial_duration_spacing_impact: "min_duration_sets_grid_spacing" # delta_f <= 1 / (T_baseline * (T_dur_min / P_min))
+    frequency_factor: 5.0                # [PROPOSED] Candidate oversampling factor; calibrate on synthetic injections
+    duration_grid_days: [0.0417, 0.0833, 0.1250, 0.1667, 0.2083, 0.2500, 0.2917, 0.3333] # 1.0h to 8.0h
+    flux_weighting_model: "REQUIRES_RESEARCHER_APPROVAL" # GATE-10: [PROPOSED] "inverse_variance" vs "uniform"
+    sde_background_specification: "REQUIRES_RESEARCHER_APPROVAL" # GATE-11: Options A, B, C, D pending
+    sde_alias_exclusion_rules:
+      fundamental_peak_exclusion_half_width: "3 * delta_f"
+      harmonic_multipliers: [0.3333, 0.5000, 2.0000, 3.0000] # 1/3, 1/2, 2, 3
+      satellite_alias_frequency_delta_per_day: 0.0730 # TESS downlink/orbital resonance
+      composite_exclusion_mask: "set_theoretic_union_E" # E = E_0 U (U_h E_h) U (U_s E_s)
+      strip_invalid_bins: true           # Drop non-finite or non-positive bins prior to masking
+      min_valid_frequency_bins: 50       # Returns NaN if unmasked finite bins < 50
+      sde_dispersion_estimator: "normalized_mad" # 1.4826 * MAD for Option C
+    depth_variance_formulation: "sum_in_inv_plus_sum_out_inv" # Var(delta) = 1/sum_in(w) + 1/sum_out(w)
+    depth_error_formulation: "sqrt_variance" # sigma_delta = sqrt(Var(delta))
+    snr_definition: "formal_depth_over_error" # SNR = delta / sigma_delta
+    sde_definition: "spectral_peak_prominence" # (P_max - mu) / sigma
+    decouple_sde_from_snr: true          # Prohibit treating SDE and SNR as interchangeable
+    tie_breaking_rule: "lower_period"   # Deterministic: pick lower period on identical objective power
+    sde_threshold: 6.0                  # [PROPOSED] Candidate SDE detection threshold
+    min_snr: 5.0                        # [PROPOSED] Candidate SNR threshold
+    isolated_timing: true               # time.perf_counter() strictly around search call
+    oversampling_calibration: "synthetic_injections_only" # Prohibit tuning frequency_factor on benchmark labels
+    output_artifact: "results/real_benchmark/bls_blind_predictions.csv"
+
+  tabular_ml_baselines:
+    enabled: true
+    task_definition: "bls_candidate_vetting_classifier" # Evaluates primary BLS peak; NOT independent search
+    models: ["RandomForest", "HistGradientBoosting"]
+    feature_dimension: 22
+    training_data_source: "disjoint_external" # Synthetic or non-benchmark sectors with zero test overlap
+    decision_threshold: "calibrated_on_validation_split" # Prohibited from tuning on test cohort
+    output_artifact: "results/real_benchmark/tabular_ml_blind_predictions.csv"
+
+  cnn1d_deep_baseline:
+    enabled: false                        # ON CONDITIONAL PROBATION
+    probation_reason: "Historical all-positive collapse (FPR=1.0) on imbalanced data"
+    validation_gate:
+      min_specificity: 0.85               # [PROPOSED] GATE-02
+      min_sensitivity: "REQUIRES_RESEARCHER_APPROVAL" # GATE-02: [PROPOSED] candidate 0.75
+      require_confusion_matrix_review: true
+      phase_folding_source: "blind_bls_candidate_period" # Strictly prohibited from using catalog period
+      calibration_split: "independent_validation_set"
+    output_artifact: "results/real_benchmark/cnn1d_diagnostic_predictions.csv"
+
+scoring_and_tolerances:
+  period_matching_tolerance_fraction: "REQUIRES_RESEARCHER_APPROVAL" # GATE-01: [PROPOSED] 0.01 (1.0%)
+  harmonic_ratios: [0.3333, 0.5000, 2.0000, 3.0000] # [PROPOSED] GATE-04: Fundamental 1.0 scored separately
+  epoch_matching_method: "circular_phase_distance"
+  epoch_matching_tolerance_gate: "REQUIRES_RESEARCHER_APPROVAL" # GATE-12
+  epoch_matching_options:
+    option_a: "0.50 * T_dur"             # Physical transit dip contact 1 to 4
+    option_b: "0.25 * T_dur"             # Core transit alignment
+    option_c: "min(0.50 * T_dur, sqrt(sigma_det^2 + (3 * sigma_tmid)^2))" # [PROPOSED] Bounded composite
+  option_c_clarifications:
+    detector_resolution_interpretation: "candidate 0.25*Tdur is detector phase resolution sigma_det (calibrated via synthetic injections) or scoring convention"
+    cap_interpretation: "0.50*Tdur cap is strictly a scoring convention, NOT a statistical confidence bound"
+  distinguish_eligibility_from_matching: true # sigma_tmid <= 0.25*Tdur is target filter; Delta t0 <= tol is detection match
+  general_ephemeris_variance: "sigma_T0_sq_plus_E_sq_sigma_P_sq_plus_2_E_Cov"
+  single_transit_evaluation_mode: "event_only" # Single transit systems evaluated for event, not period
+  prohibit_population_ppv: true         # Prohibit claiming survey precision from balanced 50:50 cohort
+
+event_coverage_hierarchy:
+  tiers:
+    - "predicted_events"                # N_predicted: geometric midtimes
+    - "baseline_intersecting_events"    # N_baseline: intersects [t_base_min, t_base_max]
+    - "downloaded_cadence_events"       # N_downloaded: >= 1 raw FITS cadences
+    - "quality_valid_events"            # N_valid: >= 1 cadences with QUALITY==0 and finite flux
+    - "adequately_covered_events"       # N_adequate: N_valid >= 5 AND f_temporal >= 50%
+  baseline_definition: "exposure_boundaries" # [min(t_i - delta_t_exp/2), max(t_i + delta_t_exp/2)]
+  evaluation_window: "physical_transit_duration" # [t_mid - Tdur/2, t_mid + Tdur/2]
+  temporal_coverage_definition: "lebesgue_exposure_intersection" # mu(W_event_k \cap U_i I_i) / T_dur in [0, 1]
+  min_temporal_coverage_fraction: 0.50  # [PROPOSED] f_temporal >= 0.50 (GATE-03)
+  min_valid_cadences: 5                 # [PROPOSED] N_valid >= 5 (GATE-03)
+  prohibit_cadence_only_adequacy: true  # Cadence count alone is NOT adequate
+  cadence_count_ratio_diagnostic: true  # R_cadence tracked as separate sampling diagnostic
+  partial_event_policy_gate: "REQUIRES_RESEARCHER_APPROVAL" # GATE-03: [PROPOSED] Categorical exclusion vs partial evaluation vs secondary diagnostic track
+  sector_boundary_truncation_rule: "exclude_if_start_before_tmin_or_end_after_tmax"
+  partial_events_adequate: false        # [PROPOSED] Partial events cannot qualify as adequate under Option A
+  exclude_partial_boundary_events_from_denominator: true # [PROPOSED] Excluded from N_adequate under Option A
+  exclude_downlink_gap_events_from_denominator: true
+
+metrics_and_reporting:
+  primary_metrics:
+    - "fundamental_period_recovery_rate"          # (TP_full + TP_pe) / N_eligible_hosts
+    - "harmonic_period_recovery_rate"             # TP_harm / N_eligible_hosts
+    - "full_orbit_recovery_rate"                  # TP_full / N_eligible_hosts
+    - "event_level_recovery_rate"                 # N_recovered_events / N_adequate_events
+    - "comparison_star_detection_rate"            # FP_comp / N_comparison_stars (catalog-inconsistent)
+  prohibited_inferences:
+    - "population_positive_predictive_value"      # Cannot be inferred without true occurrence rate weighting
+    - "survey_level_false_positive_rate"
+  uncertainty_estimation:
+    method: "wilson_score_interval"
+    confidence_level: 0.95
+    acknowledge_small_sample_limits: true         # Note that Wilson intervals do not cure small N=10 or label uncertainty
+  stratification_bins:
+    depth_ppm: [0, 1000, 5000, 100000]
+    period_days: [0.5, 3.0, 10.0, 30.0]
+    tmag: [8.0, 11.0, 12.5, 16.0]
+  attrition_accounting:
+    target_ledger: true                           # N_candidate -> N_eligible -> N_searched
+    event_ledger: true                            # N_predicted -> N_zero -> N_insufficient -> N_adequate
+

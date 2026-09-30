@@ -24,6 +24,8 @@ def main():
     parser.add_argument("--data-file", type=str, default="data/processed/synthetic_light_curves.pkl")
     parser.add_argument("--config", type=str, default="configs/default.yaml")
     parser.add_argument("--sde-threshold", type=float, default=6.0)
+    parser.add_argument("--output-json", type=str, default="results/metrics/bls_benchmark.json")
+    parser.add_argument("--plot-path", type=str, default="results/figures/bls_sde_distribution.png")
     args = parser.parse_args()
 
     logger = get_logger("bls_benchmark")
@@ -91,9 +93,8 @@ def main():
     metrics_dict["mean_search_runtime_sec"] = float(np.mean(runtimes))
     metrics_dict["total_runtime_sec"] = float(np.sum(runtimes))
 
-    metrics_dir = Path("results/metrics")
-    metrics_dir.mkdir(parents=True, exist_ok=True)
-    out_json = metrics_dir / "bls_benchmark.json"
+    out_json = Path(args.output_json)
+    out_json.parent.mkdir(parents=True, exist_ok=True)
     with open(out_json, "w") as f:
         json.dump(metrics_dict, f, indent=2)
 
@@ -102,8 +103,8 @@ def main():
                 f"Latency: {report.inference_latency_ms:.1f}ms/target")
 
     # Plot diagnostic SDE distribution
-    fig_dir = Path("results/figures")
-    fig_dir.mkdir(parents=True, exist_ok=True)
+    plot_path = Path(args.plot_path)
+    plot_path.parent.mkdir(parents=True, exist_ok=True)
     plt.figure(figsize=(8, 5))
     plt.hist(sde_scores[y_true == 1], bins=15, alpha=0.6, label="Transit Hosts", color="navy")
     plt.hist(sde_scores[y_true == 0], bins=15, alpha=0.6, label="Control Stars", color="orange")
@@ -113,7 +114,6 @@ def main():
     plt.title("BLS Periodogram Signal Detection Efficiency Distribution")
     plt.legend()
     plt.tight_layout()
-    plot_path = fig_dir / "bls_sde_distribution.png"
     plt.savefig(plot_path, dpi=200)
     plt.close()
     logger.info(f"Saved BLS diagnostic figure to {plot_path}")
