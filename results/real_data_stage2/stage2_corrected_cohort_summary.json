@@ -1,0 +1,18 @@
+{
+  "total": 100,
+  "confirmed_planet_hosts": 50,
+  "observational_controls": 50,
+  "verified_single_planet_hosts_pre_correction": 41,
+  "multi_planet_systems_removed": 9,
+  "replacement_candidates_admitted": 9,
+  "all_host_sy_pnum": 1,
+  "all_host_sectors_approved": true,
+  "host_sector_distribution": {
+    "5": 16,
+    "2": 15,
+    "1": 10,
+    "6": 9
+  },
+  "gate_06_status": "CORRECTED - 50 verified single-planet hosts in approved sectors (Sectors 1, 2, 5, 6)",
+  "note": "Controls remain unchanged. Controls are observational comparison stars (non-detection controls under BDR-005), not confirmed planet-free negatives."
+}

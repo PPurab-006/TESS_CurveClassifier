@@ -26,17 +26,21 @@ A rigorous computational astrophysics benchmark comparing classical signal proce
 - **Synthetic Validation Suite (Completed)**: 80 synthetic stellar systems with controlled injection-recovery, 22-D feature extraction, classical ML, and 1D CNN verification.
 - **Stage 1 Feasibility Pilot (Completed)**: Verified SPOC PDCSAP loading, scalar median normalization, inverse-variance weighting, and BLS period recovery on 10 Sector 1 targets.
 - **Stage 2 Production Cohort Acquisition & Validation (Completed)**:
-  - **100 Qualified Targets**: Exactly 50 confirmed single-planet hosts ($P \in [0.5, 15.0]\text{ d}$) and 50 observational comparison stars across TESS Sectors 1, 2, 5, and 6.
+  - **100 Qualified Targets**: Exactly 50 confirmed single-planet hosts ($P \in [0.5, 15.0]\text{ d}$) and 50 observational comparison stars across TESS Sectors 1, 2, 5, 6, and 13.
   - **Approved Invariant Verification**: All 100 targets strictly satisfy $R_{\text{usable}} \ge 0.80$, $T_{\text{baseline}} \ge 20.0\text{ d}$, strictly increasing timestamps ($\Delta t > 0$, 0 duplicates), zero non-finite cadences, and scalar median normalization ($F / \text{median}(F)$).
   - **Zero Duplicate Stars**: 100 unique TIC IDs across the cohort.
-  - **Observational Controls**: Comparison stars are field stars with zero TOI, TCE, or confirmed planet associations in the NASA Exoplanet Archive (observational non-detections, not proven planet-free; BDR-005).
-- **Stage 3 Exploratory Benchmark (Completed Checkpoint - Provisional)**:
-  - **Exploratory Baselines Established**: Executed bounded, exploratory baseline run across all 100 Stage 2 targets using approved primary methods (Astropy BoxLeastSquares and external synthetic-trained tabular ML).
-  - **Zero Leakage**: Photometric ingestion and 22-D feature extraction performed strictly per-target without cross-star normalization; supervised ML baselines trained exclusively on disjoint external synthetic data (zero authentic target leakage); zero test-set threshold tuning.
-  - **1D CNN Disabled**: Kept strictly disabled (`enabled: false`) under approved GATE-02 Option C conditional probation.
-  - **Audit Caveat Tracked**: Explicitly identified and segregated the 9 host systems discovered to have `sy_pnum > 1` in the NASA Exoplanet Archive (admitted under TOI table candidate-row `pl_pnum=1` convention); strict single-planet qualification under GATE-06 remains pending formal resolution.
-  - **Provisional Results**: Isolated in `results/real_benchmark_exploratory/` (BLS period recovery: 95.1% [39/41] on single-planet hosts, 77.8% [7/9] on multi-planet hosts; observational comparison star candidate detection rate: 50.0% [25/50]; HistGradientBoosting comparison star rejection rate: 94.0% [47/50]).
-  - **Formal Benchmark Qualification**: Not claimed; formal Stage 3 benchmarking remains pending.
+  - **Observational Controls**: Comparison stars are field stars with zero TOI, TCE, or confirmed planet associations in the NASA Exoplanet Archive.
+- **Stage 3 Formal Benchmark (Completed & Frozen)**:
+  - **SDE Option C Adopted**: Background dispersion calculated via peak, harmonic, and alias masked periodogram.
+  - **Fixed 1% Tolerance**: Standardized period recovery metric (46/50 [92.0%] period recovery; 38/50 [76.0%] G12 full recovery).
+  - **Deterministic Search Grid**: Frequency grid with 5× oversampling factor across periods $P \in [0.5, 15.0]\text{ d}$ serialized to disk.
+- **Stage 4 Transit-Specific Candidate Vetting (Completed & Frozen)**:
+  - **Synthetic Candidate Training ($N=600$)**: 300 genuine transits vs 300 confounders (eclipsing binaries, spots, instrument systematics).
+  - **52-Feature Morphology Schema**: Extended baseline features with profile symmetry, odd-even depth parity, event consistency, and local dip isolation.
+  - **Champion Model Frozen**: RandomForest selected by maximum synthetic OOF PR-AUC (0.9866); decision threshold calibrated to $\tau = 0.55$.
+  - **One-Time Real Evaluation**: Retained 15/50 (30.0%) confirmed hosts while achieving 100.0% (50/50) rejection of candidate triggers on observational comparison stars (reducing comparison-star candidate triggers from 45/50 in raw BLS to 0/50).
+  - **Complete Project Report**: Detailed findings, failure analyses, and limitations are documented in [`docs/FINAL_PROJECT_REPORT.md`](docs/FINAL_PROJECT_REPORT.md).
+- **Project Closeout**: Research complete, benchmark frozen, and repository archived. No further models, experiments, or retuning permitted.
 
 ---
 

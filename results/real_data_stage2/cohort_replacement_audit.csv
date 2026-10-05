@@ -1,0 +1,10 @@
+removed_tic,removed_hostname,removed_toi,removed_sector,removal_reason,admitted_tic,admitted_hostname,admitted_planet,admitted_sy_pnum,admitted_sector,admitted_usable_frac,admitted_baseline_days
+92352620,WASP-94 A,TOI-107.01,1,sy_pnum > 1 in NASA Exoplanet Archive ps table (multi-planet system),170102285,WASP-23,WASP-23 b,1,6,0.9272228600586808,21.772447612337373
+52368076,TOI-125,TOI-125.01,2,sy_pnum > 1 in NASA Exoplanet Archive ps table (multi-planet system),52640302,WASP-64,WASP-64 b,1,6,0.9318790662074244,21.772463062280394
+183532609,WASP-8,TOI-191.01,2,sy_pnum > 1 in NASA Exoplanet Archive ps table (multi-planet system),306362738,WASP-49,WASP-49 b,1,6,0.9314963643321852,21.7721062835451
+251848941,TOI-178,TOI-178.01,2,sy_pnum > 1 in NASA Exoplanet Archive ps table (multi-planet system),47911178,WASP-101,WASP-101 b,1,6,0.9300293404771016,21.772374528428145
+262530407,GJ 3090,TOI-177.01,2,sy_pnum > 1 in NASA Exoplanet Archive ps table (multi-planet system),59843967,HATS-4,HATS-4 b,1,6,0.9315601479780584,21.77222451634293
+307210830,L 98-59,TOI-175.01,2,sy_pnum > 1 in NASA Exoplanet Archive ps table (multi-planet system),290131778,HD 202772 A,HD 202772 A b,1,1,0.9055090655509066,27.74431789128812
+31374837,TOI-431,TOI-431.01,5,sy_pnum > 1 in NASA Exoplanet Archive ps table (multi-planet system),317548889,TOI-480,TOI-480 b,1,6,0.931751498915678,21.772005652278267
+189013224,TOI-426,TOI-426.01,5,sy_pnum > 1 in NASA Exoplanet Archive ps table (multi-planet system),410214986,DS Tuc A,DS Tuc A b,1,1,0.9099422195656506,27.880419946692427
+33692729,TOI-469,TOI-469.01,6,sy_pnum > 1 in NASA Exoplanet Archive ps table (multi-planet system),402026209,WASP-4,WASP-4 b,1,2,0.9271419161980038,27.406582398107957

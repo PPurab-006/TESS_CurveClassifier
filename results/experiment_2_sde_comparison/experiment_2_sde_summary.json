@@ -1,0 +1,42 @@
+{
+  "execution_date_utc": "2026-10-03T04:27:48.598679+00:00",
+  "total_runtime_sec": 53.78429074998712,
+  "software_versions": {
+    "python": "3.11.15",
+    "astropy": "8.0.1",
+    "numpy": "2.4.6",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43"
+  },
+  "n_pilot_targets": 10,
+  "n_total_evaluated": 110,
+  "pilot_summary": {
+    "mean_sde_opt_a": 11.037768755349363,
+    "mean_sde_opt_b": 63.44377902568722,
+    "mean_sde_opt_c": 63.875433761338094,
+    "mean_sde_opt_d": 70.13738401802257,
+    "median_sde_opt_a": 11.84761891238684,
+    "median_sde_opt_b": 67.15009986162717,
+    "median_sde_opt_c": 67.51365280423475,
+    "median_sde_opt_d": 77.28066723902316,
+    "mean_mask_fraction_opt_c": 0.004793919006793879,
+    "degenerate_count_opt_c": 0,
+    "mad_zero_count_opt_c": 0
+  },
+  "artifacts": {
+    "paired_predictions_csv": "results/experiment_2_sde_comparison/experiment_2_sde_paired_predictions.csv"
+  },
+  "stage2_summary": {
+    "n_stage2_targets": 100,
+    "mean_sde_opt_a": 10.640365091002645,
+    "mean_sde_opt_b": 50.23750382468239,
+    "mean_sde_opt_c": 50.64332071263042,
+    "mean_sde_opt_d": 57.69266548641726,
+    "median_sde_opt_a": 9.298751695209843,
+    "median_sde_opt_b": 35.067804384209346,
+    "median_sde_opt_c": 35.38047265275076,
+    "median_sde_opt_d": 37.85665208737069,
+    "mean_mask_fraction_opt_c": 0.005197794679853687,
+    "degenerate_count_opt_c": 0,
+    "mad_zero_count_opt_c": 0
+  }
+}

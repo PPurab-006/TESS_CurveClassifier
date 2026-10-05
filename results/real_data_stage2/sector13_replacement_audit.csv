@@ -1,0 +1,2 @@
+removed_tic,removed_hostname,removed_sector,removal_reason,admitted_tic,admitted_hostname,admitted_planet,admitted_sy_pnum,admitted_sector,admitted_usable_frac,admitted_baseline_days,fits_filename,sha256,replacement_type
+290348383,HD 207496,13,"Observed in Sector 13 (unapproved sector outside protocol sectors [1, 2, 3, 4, 5] and expansion sectors [2, 5, 6])",402026209,WASP-4,WASP-4 b,1,2,0.9271419161980038,27.406582398107957,tess2018234235059-s0002-0000000402026209-0121-s_lc.fits,5fa487ee43dba32c196901277234570f781e3d6ff82b8b1cab777617e3f6a783,operational_cohort_replacement

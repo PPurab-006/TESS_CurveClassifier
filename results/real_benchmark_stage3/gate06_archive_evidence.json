@@ -1,0 +1,299 @@
+{
+  "timestamp": "2026-10-04T16:51:48Z",
+  "tap_url": "https://exoplanetarchive.ipac.caltech.edu/TAP/sync",
+  "table": "ps",
+  "results": [
+    {
+      "tic": 170102285,
+      "name": "WASP-23",
+      "sy_pnum": 1,
+      "planets": [
+        "WASP-23 b",
+        "WASP-23 b",
+        "WASP-23 b",
+        "WASP-23 b",
+        "WASP-23 b",
+        "WASP-23 b"
+      ],
+      "periods": [
+        2.9444,
+        2.9444,
+        2.9444,
+        2.9444,
+        2.9444,
+        2.9444
+      ],
+      "status": "PASS",
+      "n_rows": 6,
+      "raw_response_first_row": {
+        "hostname": "WASP-23",
+        "pl_name": "WASP-23 b",
+        "pl_orbper": 2.9444256,
+        "pl_trandur": 2.39424,
+        "pl_trandep": 1.691,
+        "sy_pnum": 1,
+        "tic_id": "TIC 170102285",
+        "default_flag": 1,
+        "pl_controv_flag": 0
+      }
+    },
+    {
+      "tic": 52640302,
+      "name": "WASP-64",
+      "sy_pnum": 1,
+      "planets": [
+        "WASP-64 b",
+        "WASP-64 b",
+        "WASP-64 b",
+        "WASP-64 b",
+        "WASP-64 b",
+        "WASP-64 b"
+      ],
+      "periods": [
+        1.5733,
+        1.5733,
+        1.5733,
+        1.5733,
+        1.5733,
+        1.5733
+      ],
+      "status": "PASS",
+      "n_rows": 6,
+      "raw_response_first_row": {
+        "hostname": "WASP-64",
+        "pl_name": "WASP-64 b",
+        "pl_orbper": 1.5732918,
+        "pl_trandur": 2.39976,
+        "pl_trandep": 1.522,
+        "sy_pnum": 1,
+        "tic_id": "TIC 52640302",
+        "default_flag": 1,
+        "pl_controv_flag": 0
+      }
+    },
+    {
+      "tic": 306362738,
+      "name": "WASP-49",
+      "sy_pnum": 1,
+      "planets": [
+        "WASP-49 b",
+        "WASP-49 b",
+        "WASP-49 b",
+        "WASP-49 b",
+        "WASP-49 b",
+        "WASP-49 b",
+        "WASP-49 b",
+        "WASP-49 b"
+      ],
+      "periods": [
+        2.7817,
+        2.7817,
+        2.7817,
+        2.7817,
+        2.7817,
+        2.7817,
+        2.7817,
+        2.7817
+      ],
+      "status": "PASS",
+      "n_rows": 8,
+      "raw_response_first_row": {
+        "hostname": "WASP-49",
+        "pl_name": "WASP-49 b",
+        "pl_orbper": 2.78174,
+        "pl_trandur": null,
+        "pl_trandep": 1.4,
+        "sy_pnum": 1,
+        "tic_id": "TIC 306362738",
+        "default_flag": 1,
+        "pl_controv_flag": 0
+      }
+    },
+    {
+      "tic": 47911178,
+      "name": "WASP-101",
+      "sy_pnum": 1,
+      "planets": [
+        "WASP-101 b",
+        "WASP-101 b",
+        "WASP-101 b",
+        "WASP-101 b",
+        "WASP-101 b",
+        "WASP-101 b",
+        "WASP-101 b",
+        "WASP-101 b",
+        "WASP-101 b"
+      ],
+      "periods": [
+        3.5857,
+        3.5857,
+        3.5857,
+        3.5857,
+        3.5857,
+        3.5857,
+        3.5857,
+        null,
+        3.5857
+      ],
+      "status": "PASS",
+      "n_rows": 9,
+      "raw_response_first_row": {
+        "hostname": "WASP-101",
+        "pl_name": "WASP-101 b",
+        "pl_orbper": 3.58572,
+        "pl_trandur": null,
+        "pl_trandep": 1.3,
+        "sy_pnum": 1,
+        "tic_id": "TIC 47911178",
+        "default_flag": 1,
+        "pl_controv_flag": 0
+      }
+    },
+    {
+      "tic": 59843967,
+      "name": "HATS-4",
+      "sy_pnum": 1,
+      "planets": [
+        "HATS-4 b",
+        "HATS-4 b",
+        "HATS-4 b",
+        "HATS-4 b",
+        "HATS-4 b",
+        "HATS-4 b",
+        "HATS-4 b"
+      ],
+      "periods": [
+        2.5167,
+        2.5167,
+        2.5167,
+        2.5167,
+        2.5167,
+        2.5167,
+        2.5167
+      ],
+      "status": "PASS",
+      "n_rows": 7,
+      "raw_response_first_row": {
+        "hostname": "HATS-4",
+        "pl_name": "HATS-4 b",
+        "pl_orbper": 2.516729,
+        "pl_trandur": 2.5272,
+        "pl_trandep": null,
+        "sy_pnum": 1,
+        "tic_id": "TIC 59843967",
+        "default_flag": 1,
+        "pl_controv_flag": 0
+      }
+    },
+    {
+      "tic": 290131778,
+      "name": "HD 202772 A",
+      "sy_pnum": 1,
+      "planets": [
+        "HD 202772 A b",
+        "HD 202772 A b",
+        "HD 202772 A b",
+        "HD 202772 A b"
+      ],
+      "periods": [
+        3.3089,
+        3.309,
+        3.3089,
+        3.3089
+      ],
+      "status": "PASS",
+      "n_rows": 4,
+      "raw_response_first_row": {
+        "hostname": "HD 202772 A",
+        "pl_name": "HD 202772 A b",
+        "pl_orbper": 3.3088775,
+        "pl_trandur": 5.6731,
+        "pl_trandep": 0.467,
+        "sy_pnum": 1,
+        "tic_id": "TIC 290131778",
+        "default_flag": 1,
+        "pl_controv_flag": 0
+      }
+    },
+    {
+      "tic": 317548889,
+      "name": "TOI-480",
+      "sy_pnum": 1,
+      "planets": [
+        "TOI-480 b",
+        "TOI-480 b"
+      ],
+      "periods": [
+        6.8662,
+        6.866
+      ],
+      "status": "PASS",
+      "n_rows": 2,
+      "raw_response_first_row": {
+        "hostname": "TOI-480",
+        "pl_name": "TOI-480 b",
+        "pl_orbper": 6.866196,
+        "pl_trandur": 3.5709418,
+        "pl_trandep": null,
+        "sy_pnum": 1,
+        "tic_id": "TIC 317548889",
+        "default_flag": 1,
+        "pl_controv_flag": 0
+      }
+    },
+    {
+      "tic": 410214986,
+      "name": "DS Tuc A",
+      "sy_pnum": 1,
+      "planets": [
+        "DS Tuc A b",
+        "DS Tuc A b",
+        "DS Tuc A b"
+      ],
+      "periods": [
+        8.1383,
+        8.1382,
+        8.1387
+      ],
+      "status": "PASS",
+      "n_rows": 3,
+      "raw_response_first_row": {
+        "hostname": "DS Tuc A",
+        "pl_name": "DS Tuc A b",
+        "pl_orbper": 8.138268,
+        "pl_trandur": 3.1764,
+        "pl_trandep": 0.2936,
+        "sy_pnum": 1,
+        "tic_id": "TIC 410214986",
+        "default_flag": 1,
+        "pl_controv_flag": 0
+      }
+    },
+    {
+      "tic": 290348383,
+      "name": "HD 207496",
+      "sy_pnum": 1,
+      "planets": [
+        "HD 207496 b",
+        "HD 207496 b"
+      ],
+      "periods": [
+        6.441,
+        6.441
+      ],
+      "status": "PASS",
+      "n_rows": 2,
+      "raw_response_first_row": {
+        "hostname": "HD 207496",
+        "pl_name": "HD 207496 b",
+        "pl_orbper": 6.441008,
+        "pl_trandur": 1.762,
+        "pl_trandep": null,
+        "sy_pnum": 1,
+        "tic_id": "TIC 290348383",
+        "default_flag": 1,
+        "pl_controv_flag": 0
+      }
+    }
+  ]
+}

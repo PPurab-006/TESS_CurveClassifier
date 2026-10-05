@@ -208,3 +208,71 @@ def test_bls_insufficient_data_handling():
     assert res.is_detected is False
     assert res.best_period == 0.0
 
+
+def test_bls_frequency_grid_serialization(tmp_path):
+    """
+    Verify GATE-09 frequency grid persistence and correspondence to Astropy periodogram.
+    """
+    from astropy.timeseries import BoxLeastSquares
+
+    config = SyntheticTransitConfig(
+        duration_days=10.0,
+        cadence_minutes=10.0,
+        has_transit=True,
+        period_days=2.5,
+        t0_days=0.5,
+        depth=0.008,
+        duration_hours=2.0,
+        noise_sigma=0.001,
+        seed=123
+    )
+    raw_lc = generate_synthetic_light_curve(config, target_id="GRID-TEST")
+    clean_lc = preprocess_light_curve(raw_lc, clip_outliers=False, detrend=False)
+
+    detector = BLSDetector(
+        min_period=0.5,
+        max_period=8.0,
+        frequency_factor=5.0,
+        save_frequency_grid=True
+    )
+    res = detector.search(clean_lc)
+
+    # 1. Frequency grid is present and non-empty
+    assert res.frequency_grid is not None
+    assert len(res.frequency_grid) > 100
+    assert np.all(res.frequency_grid > 0)
+
+    # 2. Independent computation via Astropy BoxLeastSquares directly matches
+    cleaned = clean_lc.clean()
+    model = BoxLeastSquares(cleaned.time, cleaned.flux, dy=cleaned.flux_err)
+    max_p = min(8.0, (cleaned.time[-1] - cleaned.time[0]) * 0.95)
+    direct_periodogram = model.autopower(
+        duration=detector.duration_grid,
+        minimum_period=0.5,
+        maximum_period=max_p,
+        frequency_factor=5.0
+    )
+    expected_frequencies = 1.0 / np.asarray(direct_periodogram.period, dtype=float)
+
+    assert len(res.frequency_grid) == len(expected_frequencies)
+    assert np.allclose(res.frequency_grid, expected_frequencies, rtol=1e-12)
+
+    # 3. Serialization to disk via serialize_grid
+    grid_path = tmp_path / "test_grid.npy"
+    saved_path = res.serialize_grid(grid_path)
+    assert saved_path == grid_path
+    assert grid_path.exists()
+
+    loaded_grid = np.load(grid_path)
+    assert np.array_equal(res.frequency_grid, loaded_grid)
+
+    # 4. Exact reconstruction metadata in grid_info
+    grid_info = res.metadata.get("grid_info", {})
+    assert grid_info["frequency_factor"] == 5.0
+    assert grid_info["min_period"] == 0.5
+    assert np.isclose(grid_info["max_period"], max_p)
+    assert grid_info["n_frequencies"] == len(res.frequency_grid)
+    assert np.isclose(grid_info["min_frequency"], np.min(expected_frequencies))
+    assert np.isclose(grid_info["max_frequency"], np.max(expected_frequencies))
+
+

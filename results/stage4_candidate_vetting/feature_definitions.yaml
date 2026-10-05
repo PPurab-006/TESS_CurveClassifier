@@ -1,0 +1,115 @@
+version: 1.0.0
+total_features: 52
+groups:
+  baseline:
+  - bls_sde
+  - bls_snr
+  - bls_period
+  - bls_depth
+  - bls_duration
+  - bls_duty_cycle
+  - bls_max_power
+  - flux_std
+  - flux_skewness
+  - flux_kurtosis
+  - flux_mad
+  - flux_p1
+  - flux_p5
+  - flux_iqr
+  - flux_min
+  - flux_depth_robust
+  - von_neumann_ratio
+  - outlier_fraction_low
+  - outlier_fraction_high
+  - folded_transit_depth
+  - odd_even_depth_ratio
+  - secondary_eclipse_depth
+  shape:
+  - shape_depth_to_local_mad
+  - shape_candidate_duty_cycle
+  - shape_in_out_contrast
+  - shape_ingress_ratio
+  - shape_in_transit_fraction
+  - shape_in_transit_mad
+  - shape_mad_ratio
+  morphology:
+  - morph_symmetry
+  - morph_ingress_egress_diff
+  - morph_flat_bottom_kurtosis
+  - morph_broad_depression_ratio
+  - morph_core_to_wing_ratio
+  event_consistency:
+  - event_n_observed
+  - event_n_adequate
+  - event_adequate_fraction
+  - event_depth_scatter_mad
+  - event_single_event_dominance
+  odd_even:
+  - odd_even_depth_difference
+  - odd_even_depth_ratio_v2
+  - odd_even_significance
+  - secondary_eclipse_max_depth_ratio
+  variability:
+  - var_global_to_local_std
+  - var_autocorr_peak
+  - var_has_autocorr_modulation
+  - var_flare_cadence_rate
+  - var_out_of_transit_smoothness
+  localization:
+  - local_variance_contrast
+  - local_flux_deficit_concentration
+  - local_dip_isolation
+  - local_baseline_flatness
+feature_list:
+- bls_sde
+- bls_snr
+- bls_period
+- bls_depth
+- bls_duration
+- bls_duty_cycle
+- bls_max_power
+- flux_std
+- flux_skewness
+- flux_kurtosis
+- flux_mad
+- flux_p1
+- flux_p5
+- flux_iqr
+- flux_min
+- flux_depth_robust
+- von_neumann_ratio
+- outlier_fraction_low
+- outlier_fraction_high
+- folded_transit_depth
+- odd_even_depth_ratio
+- secondary_eclipse_depth
+- shape_depth_to_local_mad
+- shape_candidate_duty_cycle
+- shape_in_out_contrast
+- shape_ingress_ratio
+- shape_in_transit_fraction
+- shape_in_transit_mad
+- shape_mad_ratio
+- morph_symmetry
+- morph_ingress_egress_diff
+- morph_flat_bottom_kurtosis
+- morph_broad_depression_ratio
+- morph_core_to_wing_ratio
+- event_n_observed
+- event_n_adequate
+- event_adequate_fraction
+- event_depth_scatter_mad
+- event_single_event_dominance
+- odd_even_depth_difference
+- odd_even_depth_ratio_v2
+- odd_even_significance
+- secondary_eclipse_max_depth_ratio
+- var_global_to_local_std
+- var_autocorr_peak
+- var_has_autocorr_modulation
+- var_flare_cadence_rate
+- var_out_of_transit_smoothness
+- local_variance_contrast
+- local_flux_deficit_concentration
+- local_dip_isolation
+- local_baseline_flatness

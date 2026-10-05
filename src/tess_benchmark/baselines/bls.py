@@ -7,11 +7,14 @@ Signal Detection Efficiency (SDE), SNR estimation, harmonic checks, and runtime 
 import math
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple, Sequence
 import numpy as np
+import astropy
 from astropy.timeseries import BoxLeastSquares
 
 from ..data.protocol import LightCurveData
+from .sde import compute_sde, SDEResult
 
 
 @dataclass
@@ -58,6 +61,18 @@ class BLSResult:
     is_detected: bool
     runtime_sec: float
     metadata: Dict[str, Any] = field(default_factory=dict)
+    frequency_grid: Optional[np.ndarray] = None
+
+    def serialize_grid(self, filepath: Path | str) -> Optional[Path]:
+        """
+        Serialize frequency grid array to persistent disk (GATE-09).
+        """
+        if self.frequency_grid is None:
+            return None
+        p = Path(filepath)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        np.save(p, self.frequency_grid)
+        return p
 
     def is_period_recovered(
         self,
@@ -182,7 +197,9 @@ class BLSDetector:
         duration_grid: Optional[np.ndarray] = None,
         frequency_factor: float = 5.0,
         sde_threshold: float = 6.0,
-        min_snr: float = 5.0
+        min_snr: float = 5.0,
+        sde_method: str = "option_a",
+        save_frequency_grid: bool = True
     ):
         self.min_period = min_period
         self.max_period = max_period
@@ -194,6 +211,8 @@ class BLSDetector:
         self.frequency_factor = frequency_factor
         self.sde_threshold = sde_threshold
         self.min_snr = min_snr
+        self.sde_method = sde_method
+        self.save_frequency_grid = save_frequency_grid
 
     def search(self, lc: LightCurveData) -> BLSResult:
         """
@@ -250,9 +269,16 @@ class BLSDetector:
         # Find peak
         best_idx = np.argmax(power)
         max_pow = float(power[best_idx])
-        mean_pow = float(np.mean(power))
-        std_pow = float(np.std(power))
-        sde = (max_pow - mean_pow) / std_pow if std_pow > 0 else 0.0
+
+        # Compute SDE under configured GATE-11 method
+        sde_res = compute_sde(
+            power=power,
+            periods=periods,
+            method=self.sde_method
+        )
+        sde = float(sde_res.sde) if np.isfinite(sde_res.sde) else 0.0
+        mean_pow = float(sde_res.background_mean) if np.isfinite(sde_res.background_mean) else float(np.mean(power))
+        std_pow = float(sde_res.background_dispersion) if np.isfinite(sde_res.background_dispersion) else float(np.std(power))
 
         best_period = float(periods[best_idx])
         best_duration = float(periodogram.duration[best_idx])
@@ -275,6 +301,21 @@ class BLSDetector:
         is_detected = bool((sde >= self.sde_threshold) and (snr >= self.min_snr) and (best_depth > 0))
         runtime = time.perf_counter() - t_start
 
+        freq_grid = 1.0 / np.asarray(periodogram.period, dtype=float)
+        max_p_clamped = float(min(self.max_period, (time_arr[-1] - time_arr[0]) * 0.95))
+        grid_info = {
+            "frequency_factor": float(self.frequency_factor),
+            "min_period": float(self.min_period),
+            "max_period": max_p_clamped,
+            "min_frequency": float(np.min(freq_grid)),
+            "max_frequency": float(np.max(freq_grid)),
+            "n_frequencies": int(len(freq_grid)),
+            "min_duration": float(np.min(self.duration_grid)),
+            "max_duration": float(np.max(self.duration_grid)),
+            "duration_grid_days": [float(d) for d in self.duration_grid],
+            "astropy_version": str(astropy.__version__),
+        }
+
         return BLSResult(
             best_period=best_period,
             best_t0=best_t0,
@@ -290,6 +331,12 @@ class BLSDetector:
             metadata={
                 "n_cadences": len(time_arr),
                 "n_in_transit": n_in,
-                "target_id": lc.target_id
-            }
+                "target_id": lc.target_id,
+                "sde_method": self.sde_method,
+                "sde_degenerate": sde_res.sde_degenerate,
+                "mad_zero": sde_res.mad_zero,
+                "mask_fraction": sde_res.mask_fraction,
+                "grid_info": grid_info,
+            },
+            frequency_grid=freq_grid if self.save_frequency_grid else None
         )

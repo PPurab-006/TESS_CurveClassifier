@@ -1,0 +1,120 @@
+{
+  "evaluation_type": "STAGE_4_AUTHORIZED_ONE_TIME_REAL_DATA_EVALUATION",
+  "evaluation_timestamp_utc": "2026-10-05T10:37:47Z",
+  "evaluation_runtime_sec": 13.0,
+  "authorization_statement": "Explicitly authorized by user on 2026-10-05 (User Request 9)",
+  "git_head_commit": "fc795a71391129ae59219fb52e88b9a967fd4ca8",
+  "no_retraining_or_tuning": true,
+  "frozen_tau": 0.55,
+  "champion_model": "RandomForest",
+  "champion_hyperparameters": {
+    "n_estimators": 150,
+    "max_depth": 8,
+    "min_samples_leaf": 4,
+    "class_weight": "balanced",
+    "random_state": 42,
+    "n_jobs": -1,
+    "preprocessing": "SimpleImputer(strategy='median')"
+  },
+  "frozen_hashes": {
+    "real_cohort_manifest": "4231af3c6141c45fd352133d976db956474a4bb42eb47ed21a3703da25e400fb",
+    "synthetic_dataset": "ff3b371f983c311a1fbc558bf7b07059cc703d9b1c174f1569369b41c7e398ca",
+    "champion_vetter": "a9b19086d84c10e42b434bcbd235c348bca72083908213d16db1d16931244c67",
+    "baseline_vetter": "75dcd40eef228773fe28cd90e10d7ba91ff6a973a30d9548821dcfffc8274fe3",
+    "feature_schema": "b8f69874faf9ab2327ade47857110411fab0f11ca6e25896d35e5915e56132ba",
+    "stage3_predictions": "e0f8032247f8887a2eb318ea2a58ce0863af789c2ade44adc69c062ae6652cff"
+  },
+  "post_eval_hash_integrity": {
+    "champion_vetter_unchanged": true,
+    "baseline_vetter_unchanged": true,
+    "manifest_unchanged": true,
+    "stage3_ledger_unchanged": true
+  },
+  "cohort_summary": {
+    "n_total": 100,
+    "n_confirmed_hosts": 50,
+    "n_comparison_stars": 50
+  },
+  "feature_extraction_summary": {
+    "n_failed_loads": 0,
+    "failed_tic_ids": []
+  },
+  "champion_rf_52feat_results": {
+    "confirmed_hosts": {
+      "n_total": 50,
+      "n_retained": 15,
+      "n_rejected": 35,
+      "host_retention_rate": 0.3
+    },
+    "comparison_stars": {
+      "n_total": 50,
+      "n_rejected": 50,
+      "n_retained_as_candidates": 0,
+      "rejection_rate": 1.0,
+      "candidate_trigger_rate": 0.0
+    }
+  },
+  "baseline_rf_22feat_results": {
+    "confirmed_hosts": {
+      "n_retained": 7,
+      "n_rejected": 43,
+      "host_retention_rate": 0.14
+    },
+    "comparison_stars": {
+      "n_rejected": 49,
+      "n_retained": 1,
+      "rejection_rate": 0.98,
+      "candidate_trigger_rate": 0.02
+    }
+  },
+  "delta_champion_vs_baseline": {
+    "host_retention_delta": 0.16,
+    "control_rejection_delta": 0.02,
+    "control_trigger_delta": -0.02
+  },
+  "g12_cross_tabulation": {
+    "FULL_RECOVERY": {
+      "n": 38,
+      "champion_retained": 14,
+      "champion_rejected": 24,
+      "champion_retention_rate": 0.3684,
+      "baseline_retained": 6,
+      "baseline_rejected": 32
+    },
+    "PERIOD_ONLY": {
+      "n": 8,
+      "champion_retained": 1,
+      "champion_rejected": 7,
+      "champion_retention_rate": 0.125,
+      "baseline_retained": 1,
+      "baseline_rejected": 7
+    },
+    "EPOCH_ONLY": {
+      "n": 1,
+      "champion_retained": 0,
+      "champion_rejected": 1,
+      "champion_retention_rate": 0.0,
+      "baseline_retained": 0,
+      "baseline_rejected": 1
+    },
+    "REJECTED": {
+      "n": 3,
+      "champion_retained": 0,
+      "champion_rejected": 3,
+      "champion_retention_rate": 0.0,
+      "baseline_retained": 0,
+      "baseline_rejected": 3
+    }
+  },
+  "stage3_source_ledger": "results/real_benchmark_stage3/bls_formal_predictions.csv",
+  "stage3_bls_rerun": false,
+  "candidate_parameters_source": "Stage 3 frozen BLS formal predictions ledger",
+  "terminology_note": "Comparison stars are observational controls, NOT confirmed planet-free negatives. Rejection of a comparison star does NOT imply confirmed absence of transit signals. Retention of comparison stars is called 'candidate_trigger_rate', NOT false-positive rate.",
+  "limitations": [
+    "Single 100-target cohort evaluated once under fixed synthetic-trained threshold.",
+    "Threshold tau=0.55 was selected exclusively on synthetic OOF data.",
+    "Comparison stars are observational controls, not guaranteed planet-free.",
+    "No retraining or threshold adjustment permitted based on these results.",
+    "Stage 4 distinguishes periodic transit-like morphology, not transit authenticity."
+  ]
+}

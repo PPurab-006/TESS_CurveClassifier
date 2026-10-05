@@ -62,6 +62,11 @@ results/real_data_pilot/stage1/plots/
 *.joblib
 *.pkl
 
+# Reproducibility Whitelist for Frozen Stage 4 Scientific Artifacts
+!data/processed/stage4_synthetic/
+!data/processed/stage4_synthetic/*
+!results/stage4_candidate_vetting/*.joblib
+
 # Jupyter Notebook Checkpoints
 .ipynb_checkpoints
 */.ipynb_checkpoints/*

@@ -1,0 +1,52 @@
+{
+  "total_admitted_candidates": 600,
+  "total_transits": 300,
+  "total_confounders": 300,
+  "classes": {
+    "transit": {
+      "is_transit": true,
+      "generated_stars": 300,
+      "admitted_candidates": 300,
+      "bls_triggered_count": 300,
+      "bls_trigger_rate": 1.0
+    },
+    "eclipsing_binary": {
+      "is_transit": false,
+      "generated_stars": 60,
+      "admitted_candidates": 60,
+      "bls_triggered_count": 60,
+      "bls_trigger_rate": 1.0
+    },
+    "stellar_rotation": {
+      "is_transit": false,
+      "generated_stars": 62,
+      "admitted_candidates": 60,
+      "bls_triggered_count": 60,
+      "bls_trigger_rate": 0.967741935483871
+    },
+    "active_flare": {
+      "is_transit": false,
+      "generated_stars": 60,
+      "admitted_candidates": 60,
+      "bls_triggered_count": 60,
+      "bls_trigger_rate": 1.0
+    },
+    "systematics": {
+      "is_transit": false,
+      "generated_stars": 60,
+      "admitted_candidates": 60,
+      "bls_triggered_count": 60,
+      "bls_trigger_rate": 1.0
+    },
+    "red_noise": {
+      "is_transit": false,
+      "generated_stars": 84,
+      "admitted_candidates": 60,
+      "bls_triggered_count": 60,
+      "bls_trigger_rate": 0.7142857142857143
+    }
+  },
+  "feature_count": 52,
+  "generation_time_sec": 633.0391077279928,
+  "seed": 42
+}
